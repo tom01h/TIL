@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ ! -e ./work ]; then
+vlib.exe ./work
+fi
+
+vlog.exe test.v top.v
+
+vsim.exe -c work.test -lib work -do " \
+add wave -noupdate /test/* -recursive; \
+run 1us;quit"
