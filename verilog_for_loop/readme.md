@@ -27,17 +27,18 @@ Verilog Mode を使っても、自動でインデントが付かないのがい�
 ```verilog
    assign last = last_c;
 
-   loop l_c(.fin(4'd2), .data(c[3:0]), .clk(clk), .rst(rst), .start(start),  .en(last_y), .next(next_c), .last(last_c));
-   loop l_y(.fin(4'd2), .data(y[3:0]), .clk(clk), .rst(rst), .start(next_c), .en(last_x), .next(next_y), .last(last_y));
-   loop l_x(.fin(4'd2), .data(x[3:0]), .clk(clk), .rst(rst), .start(next_y), .en(1'b1),   .next(next_x), .last(last_x));
+   loop1 #(.W(4)) l_c(.ini(4'd0), .fin(4'd2), .data(c[3:0]), .start(start),  .last(last_c),
+                      .clk(clk),  .rst(rst),                  .next(next_c),   .en(last_y) );
+
+   loop1 #(.W(4)) l_y(.ini(4'd0), .fin(4'd2), .data(y[3:0]), .start(next_c), .last(last_y),
+                      .clk(clk),  .rst(rst),                  .next(next_y),   .en(last_x) );
+
+   loop1 #(.W(4)) l_x(.ini(4'd0), .fin(4'd2), .data(x[3:0]), .start(next_y), .last(last_x),
+                      .clk(clk),  .rst(rst),                  .next(next_x),   .en(1'b1) );
 
    assign wa = c*9+y*3+x;
    assign ia = c*100+y*10+x;
-
 ```
-
-Verilog なので書く順番は関係ないですが、C で書くときとそろえると読みやすくなるかと思います。  
-Verilog Mode を使っても、自動でインデントが付かないのがいまいちですけど…
 
 内側のループが終わった時だけ外側のループを実行するために、last と en をつないでいます。  
 内側のループが終わった後に、もう一度繰り返すかを外側のループから伝えるのが next と start の接続です。
@@ -46,3 +47,6 @@ Verilog Mode を使っても、自動でインデントが付かないのがい�
 
 ![wave](wave.png)
 
+流してみる環境はないですが、実際に tiny-dnn アクセラレータで使ったコードも置いておきます。  
+SystemC の tiny_dnn_sc_ctl.h, tiny_dnn_sc_ctl.cpp が tiny_dnn_ex_ctl.sv になります。  
+exec==0 の時は ia, wa が一致しませんが、exec==1 の時しか必要のない信号なので書きやすいように書いています。
