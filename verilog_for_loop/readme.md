@@ -1,23 +1,28 @@
 # Verilog で多重 loop を読みやすく記述する
 
 多重の for loop で最内ループを 1サイクルピッチで実行するための Verilog 記述を、出来るだけ読みやすくする記述を考えてみました。  
-次のような SystemC のコード(未検証)を 読みやすい Verilog で記述したいと思います。
+次のような SystemC のコードを 読みやすい Verilog で記述したいと思います。
 
 ```c++
-    if(start.read()){
-      for(int c=0; c<3; c++){
-        for(int y=0; y<3; y++){
-          for(int x=0; x<3; x++){
-            wa.write(c*9+y*3+x);
-            ia.write(c*100+y*10+x);
+    for(int c=0; c<=2; c++){
+      for(int y=0; y<=2; y++){
+        for(int x=0; x<=2; x++){
+
+          wa.write(c*9+y*3+x);
+          ia.write(c*100+y*10+x);
+
+          if(!((c==2)&&(y==2)&&(x==2))){
+            wait();
+          }
+          while(!start.read()&(c==0)&&(y==0)&&(x==0)){
             wait();
           }
         }
       }
-      last.write(1);
-      wait();
-      last.write(0);
     }
+    last.write(1);
+    wait();
+    last.write(0);
 ```
 
 Verilog で書くとこんな感じ。  
