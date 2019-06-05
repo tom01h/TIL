@@ -1,7 +1,23 @@
 # Petalinux と DMA を使うサンプル実装
 
 Zynq 上で Petalinux と DMA を使うサンプル実装です。  
-3回に分けて DMA を使えるようになる予定。
+Linux 上のユーザプログラムと PL 上の自作回路の間でデータのやり取りをします。
+
+下にあるの 2回目のやり方で CPU から uio を使って PL のデータを 1個づつ読み書きしても良いのですが、この方法はとっても遅いです。  
+でも、Linux のユーザプログラムは仮想アドレス空間で動いているので、PL から直接アクセスする事が出来ません。
+
+![pio](pio.svg)
+
+そのためにまず、 [udmabuf](https://github.com/ikwzm/udmabuf/blob/master/Readme.ja.md)  を使って、ユーザプログラムと PL のどちらからでもアクセスできるメモリ領域を PS につながった DRAM 上に準備します。  
+そして、ユーザプログラムは udmabuf の領域にデータをコピーし、PL 上の DMA を使って PL 上の BRAM との間のデータ転送をします。
+
+![dma](dma.svg)
+
+その際に少しでもデータ転送速度を上げるため、Zynq の持つ ACP 機能を使っています。  
+PL から DRAM をアクセスしたときにも CPU の持つキャッシュメモリとのコヒーレンシが保証されます。  
+CPU のレベル 2 キャッシュを PL と共有可能なため、データ転送速度が向上します。
+
+### 目次
 
 1回目: Petalinux のブート
 
@@ -18,7 +34,7 @@ Petalinux の使い方は [ZYBO (Zynq) 初心者ガイド](https://qiita.com/iwa
 ただ、tiny-dnn アクセラレータのレベルまで到達することはありません。
 
 基本的には [Arty Z7(20)](http://akizukidenshi.com/catalog/g/gM-11921/) で進めて行きますが、たまに [CORA Z7(07S)](http://akizukidenshi.com/catalog/g/gM-13489/) とか Ultra96 のサンプルも作る予定。  
-PL 部はすべて Verilog で書くので HLS も SDSoC も使いません。
+PL 部の自作回路はすべて Verilog で書くので HLS も SDSoC も使いません。
 
 ### ツールバージョン
 
@@ -26,3 +42,4 @@ Vivado 2018.2
 
 Petalinux 2018.2
 
+udmabuf 1.4.0
