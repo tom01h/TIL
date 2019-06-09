@@ -87,7 +87,7 @@ void main(){
   mem[0x00/4]=2;
   mem[0x04/4]=256;
 
-  // Wait for the tx to finish
+  // Wait for the rx to finish
   while ((dma[0x34/4] & 0x1000)!=0x1000);
 
   // MEM DMA Idle
