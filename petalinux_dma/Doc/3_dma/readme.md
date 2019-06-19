@@ -44,7 +44,7 @@ ACP 周りで Critical Warning 出るけど、良く分からないので放置�
 Vivado でビットストリーム込みの hdf ファイルをエクスポート、```petalinux_dma/project_1.sdk```にコピーして、
 
 ```
-$ source /opt/pkg/petalinux/settings.sh
+$ source /opt/pkg/petalinux/2019.1/settings.sh
 $ petalinux-create --type project --template zynq --name petalinux_dma
 $ cd petalinux_dma/
 $ petalinux-config --get-hw-description=./project_1.sdk
@@ -96,19 +96,6 @@ $ sudo dd if=images/linux/rootfs.ext4 of=/dev/sdb2 bs=16M
 $ sudo sync
 $ sudo resize2fs /dev/sdb2
 $ sudo sync
-```
-
-#### 途中でコンパイルに失敗することがあったら…
-
-[こんな理由](https://forums.xilinx.com/t5/Embedded-Linux/Error-in-add-dma-coherent-prop-cannot-generate-device-tree/td-p/811337) で 1回 ERROR で落ちます。
-
-不具合があるようなので ```build/tmp/work/plnx_zynq7-xilinx-linux-gnueabi/device-tree/xilinx+gitAUTOINC+f38738e568-r0/git/axi_dma/data/axi_dma.tcl``` を変更して再実行します。
-
-```
- proc add_dma_coherent_prop {drv_handle intf} {
-+    hsi::utils::add_new_property $drv_handle "dma-coherent" boolean ""
-+    return
-+
 ```
 
 ### プログラムをコンパイルする

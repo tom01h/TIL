@@ -36,10 +36,18 @@ Petalinux の使い方は [ZYBO (Zynq) 初心者ガイド](https://qiita.com/iwa
 基本的には [Arty Z7(20)](http://akizukidenshi.com/catalog/g/gM-11921/) で進めて行きますが、たまに [CORA Z7(07S)](http://akizukidenshi.com/catalog/g/gM-13489/) とか Ultra96 のサンプルも作る予定。  
 PL 部の自作回路はすべて Verilog で書くので HLS も SDSoC も使いません。
 
-### ツールバージョン
+### ツールバージョン (Ultra96)
 
 Vivado 2018.2
 
 Petalinux 2018.2
 
 udmabuf 1.4.0
+
+### ツールバージョン (それ以外)
+
+Vivado 2019.1
+
+Petalinux 2019.1
+
+udmabuf 1.4.1

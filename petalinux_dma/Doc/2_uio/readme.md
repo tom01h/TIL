@@ -28,7 +28,7 @@ mem モジュールの中で BRAM はオフセット 0x400 から始まる 1KB �
 Vivado でビットストリーム込みの hdf ファイルをエクスポート、```petalinux_dma/project_1.sdk```にコピーして、
 
 ```
-$ source /opt/pkg/petalinux/settings.sh
+$ source /opt/pkg/petalinux/2019.1/settings.sh
 $ petalinux-create --type project --template zynq --name petalinux_dma
 $ cd petalinux_dma/
 $ petalinux-config --get-hw-description=./project_1.sdk
