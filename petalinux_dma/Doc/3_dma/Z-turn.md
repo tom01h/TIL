@@ -17,25 +17,21 @@ mem モジュールの実装はかなりいい加減なので流用すること�
 
 #### 手動でやるなら
 
-1. Vivado でソースファイル （```Src/3_dma/mem.v``` ）を開く
-
-2. ブロックデザインの中に ```mem``` を RTLモジュールとして追加する
-
-3. サンプルデザイン ```mys-xc7z020-trd``` のブロックデザインを開いて Zynq 以外を消す。*
-
+1. サンプルデザイン ```mys-xc7z020-trd``` のブロックデザインを開いて Zynq 以外を消す。*
+2. Vivado でソースファイル （```Src/3_dma/mem.v``` ）を開く
+3. ブロックデザインの中に ```mem``` を RTLモジュールとして追加する
 4. ほかの部品を ```design_1.pdf``` を参考に追加して結線する
-
 5. PL のクロックは 100MHz
-
 6. アドレスマップは下記参照
 
-   *) 付属の DVD に入っていた mys-xc7z020-trd.rar を解凍します。
 
 | master | slave module | Start Address | End Address |
 | ------ | ------------ | ------------- | ----------- |
 | PS7    | mem          | 4000_0000     | 4000_0FFF   |
 |        | AXI DMA      | 4040_0000     | 4040_0FFF   |
-| DMA    | DDR          | 0000_0000     | 1FFF_FFFF   |
+| DMA    | DDR          | 0000_0000     | 3FFF_FFFF   |
+
+*) 付属の DVD に入っていた mys-xc7z020-trd.rar を解凍します。
 
 また、ACP を使うときには AxCACHE を 1111 or 1110 にする必要があるようなので ```Constant IP``` を使って 1111 を入れています。  
 詳しい話は [ここ](https://qiita.com/ikwzm/items/b2ee2e2ade0806a9ec07) が参考になります。  
