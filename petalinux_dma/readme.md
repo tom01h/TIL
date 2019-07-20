@@ -49,13 +49,15 @@ CPU のレベル 2 キャッシュを PL と共有可能なため、データ転
 
 [6回目](https://github.com/tom01h/TIL/tree/master/petalinux_dma/Doc/6_gemm3): PL 上の 行列乗算器(3)を使う
 
+[7回目](https://github.com/tom01h/TIL/tree/master/petalinux_dma/Doc/7_gemm4): PL 上の 行列乗算器(4)を使う
+
 Petalinux の使い方は [ZYBO (Zynq) 初心者ガイド](https://qiita.com/iwatake2222/items/966f252f6ca954aff08b) がとってもわかりやすいので、そのまま真似をします。  
 1回目は上記の 8回目と9回目の一部をなぞるだけです。2回目は16回目のチョイ変です。  
 3回目に [udmabuf](https://github.com/ikwzm/udmabuf/blob/master/Readme.ja.md) を使って DMA 転送します。  
 4回目は DMA 転送を使って、PL 上の行列乗算器で計算します。色々と工夫の余地を残した遅さです。  
 5回目は アクセラレータ IP 内部の高速化です。今回は FPGA はお休みしてシミュレーションだけ。  
 6回目はデータ転送を 2ワード(=64bit)/サイクル として、データ転送時間を半減します。今回も FPGA はお休みしてシミュレーションだけ。  
-引き続き高速化の工夫をしようと思いますが、機能的には tiny-dnn-fpga アクセラレータのレベルまで到達することはありません。
+7回目はデータ転送と演算をパイプライン動作させます。
 
 基本的には [Arty Z7(20)](http://akizukidenshi.com/catalog/g/gM-11921/) で進めて行きますが、たまに [CORA Z7(07S)](http://akizukidenshi.com/catalog/g/gM-13489/) とか [Z-turn](https://www.mouser.jp/ProductDetail/MYIR/MYS-7Z020-C-S?qs=sGAEpiMZZMspCjQQiuQ1fFTDrDpp2YD1BAGzL8zwYgeMsEw87QCFMw==) とか Ultra96 のサンプルも作る予定。  
 PL 部の自作回路はすべて Verilog で書くので HLS も SDSoC も使いません。

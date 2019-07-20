@@ -13,7 +13,7 @@ module src_buf
    reg [63:0]        wd;
    reg               ia_;
 
-   assign d = (ia_) ? wd[31:0] : wd[63:32];
+   assign d = (ia_) ? wd[63:32] : wd[31:0];
 
    always_ff @(posedge clk)
      ia_ <= ia[0];
@@ -42,12 +42,12 @@ module dst_buf
      if(outr&~oa[0])
        buff0[oa[3:1]] <= result;
      else if(dst_v)
-       dst_d[63:32] <= buff0[dst_a[2:0]];
+       dst_d[31:0] <= buff0[dst_a[2:0]];
 
    always_ff @(posedge clk)
      if(outr& oa[0])
        buff1[oa[3:1]] <= result;
      else if(dst_v)
-       dst_d[31:0] <= buff1[dst_a[2:0]];
+       dst_d[63:32] <= buff1[dst_a[2:0]];
 endmodule
 
