@@ -168,7 +168,7 @@ void main() {
           result[j][oa] = sum[oa];
         }
       }
-      printf("\n--- Sample %d Input ---\n", num);
+      printf("\n--- Sample %d Input ---\n", num+1);
       for(int j=0; j<4; j++){
         for(int i=0; i<8; i++){
           sample[j][i] = rand() & 0x000000ff;
