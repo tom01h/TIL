@@ -11,12 +11,8 @@
 
 ちなみに、変形すると Full Adder の時と同じ。
 
-<div align="left"><img src="https://latex.codecogs.com/svg.latex?\\
-    = a\cdot b + (a\oplus b)\cdot c_{in} \\
-    = a\cdot b + (\overline{a}\cdot b + a\cdot\overline{b})\cdot c_{in}\\
-    = a\cdot b + \overline{a}\cdot b\cdot c_{in} + a\cdot\overline{b}\cdot c_{in} + a\cdot b\cdot c_{in}\\
-    = a\cdot b + b\cdot c_{in} + a\cdot c_{in}
-    "/></div>
+<div align="left"><img src="https://latex.codecogs.com/svg.latex?\\%20%20%20%20=%20a\cdot%20b%20+%20(a\oplus%20b)\cdot%20c_{in}%20\\%20%20%20%20=%20a\cdot%20b%20+%20(\overline{a}\cdot%20b%20+%20a\cdot\overline{b})\cdot%20c_{in}\\%20%20%20%20=%20a\cdot%20b%20+%20\overline{a}\cdot%20b\cdot%20c_{in}%20+%20a\cdot\overline{b}\cdot%20c_{in}%20+%20a\cdot%20b\cdot%20c_{in}\\%20%20%20%20=%20a\cdot%20b%20+%20b\cdot%20c_{in}%20+%20a\cdot%20c_{in}" /></div>
+
 ### 4bit CLA の例
 
 各4bitの入力A,Bの和をSとする。
