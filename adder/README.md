@@ -4,10 +4,9 @@
 
 桁上げ (キャリー) を入力から出力へ伝える条件の ***Propagator (p)*** と、キャリーの発生する条件の ***Generator (g)*** を用た時のキャリー出力は、
 
-<div align="left"><img src="https://latex.codecogs.com/svg.latex?\\
-g=a\cdot%20b\\
-p=a\oplus%20b\\
-c_{out}=g+p\cdot%20c_{in}" /></div>
+<div align="left"><img src="https://latex.codecogs.com/svg.latex?g=a\cdot%20b" /></div>
+<div align="left"><img src="https://latex.codecogs.com/svg.latex?p=a\oplus%20b" /></div>
+<div align="left"><img src="https://latex.codecogs.com/svg.latex?c_{out}=g+p\cdot%20c_{in}" /></div>
 
 
 ちなみに、変形すると Full Adder の時と同じ。
