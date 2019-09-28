@@ -5,9 +5,10 @@
 桁上げ (キャリー) を入力から出力へ伝える条件の ***Propagator (p)*** と、キャリーの発生する条件の ***Generator (g)*** を用た時のキャリー出力は、
 
 <div align="left"><img src="https://latex.codecogs.com/svg.latex?\\
-    g = a\cdot b \\
-    p = a\oplus b \\
-    c_{out} = g + p\cdot c_{in}" /></div>
+g=a\cdot%20b\\
+p=a\oplus%20b\\
+c_{out}=g+p\cdot%20c_{in}" /></div>
+
 
 ちなみに、変形すると Full Adder の時と同じ。
 
@@ -21,7 +22,8 @@
 
 各4bitの入力A,Bの和をSとする。
 
-<div align="left"><img src="https://latex.codecogs.com/svg.latex?S=A+B+c_{in}" /></div>
+<div align="left"><img src="https://latex.codecogs.com/svg.latex?S%20=%20A+B+c_{in}" /></div>
+
 2入力の和は、各bitの入力もしくは Propagator とキャリーを使って以下のように計算できる。
 
 <div align="left"><img src="https://latex.codecogs.com/svg.latex?\\
