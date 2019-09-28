@@ -21,11 +21,13 @@
 
 2入力の和は、各bitの入力もしくは Propagator とキャリーを使って以下のように計算できる。
 
-<div align="left"><img src="https://latex.codecogs.com/svg.latex?\\
+<!-- <div align="left"><img src="https://latex.codecogs.com/svg.latex?\\
     s_0 = a_0\oplus b_0\oplus c_{in} = p_0\oplus c_{in} \\
    	s_1 = a_1\oplus b_1\oplus c_0 = p_1\oplus c_0 \\
     s_2 = a_2\oplus b_2\oplus c_1 = p_2\oplus c_1  \\
-    s_3=a_3\oplus b_3\oplus c_2 = p_3\oplus c_2" /></div>
+    s_3=a_3\oplus b_3\oplus c_2 = p_3\oplus c_2" /></div> <!-- --->
+
+<div align="left"><img src="https://latex.codecogs.com/svg.latex?\\%20%20%20%20s_0%20=%20a_0\oplus%20b_0\oplus%20c_{in}%20=%20p_0\oplus%20c_{in}%20\\%20%20%20s_1%20=%20a_1\oplus%20b_1\oplus%20c_0%20=%20p_1\oplus%20c_0%20\\%20%20%20%20s_2%20=%20a_2\oplus%20b_2\oplus%20c_1%20=%20p_2\oplus%20c_1%20%20\\%20%20%20%20s_3=a_3\oplus%20b_3\oplus%20c_2%20=%20p_3\oplus%20c_2" /></div>
 
 キャリーは Generator と Propagator を使って以下のように計算できる。
 
