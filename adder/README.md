@@ -4,12 +4,21 @@
 
 桁上げ (キャリー) を入力から出力へ伝える条件の ***Propagator (p)*** と、キャリーの発生する条件の ***Generator (g)*** を用た時のキャリー出力は、
 
-<div align="left"><img src="https://latex.codecogs.com/svg.latex?g=a\cdot%20b" /></div>
-<div align="left"><img src="https://latex.codecogs.com/svg.latex?p=a\oplus%20b" /></div>
-<div align="left"><img src="https://latex.codecogs.com/svg.latex?c_{out}=g+p\cdot%20c_{in}" /></div>
+<!-- <div align="left"><img src="https://latex.codecogs.com/svg.latex?\\
+    g = a\cdot b \\
+    p = a\oplus b \\
+    c_{out} = g + p\cdot c_{in}" /></div> <!-- --->
 
+<div align="left"><img src="https://latex.codecogs.com/svg.latex?\\%20%20%20%20g%20=%20a\cdot%20b%20\\%20%20%20%20p%20=%20a\oplus%20b%20\\%20%20%20%20c_{out}%20=%20g%20+%20p\cdot%20c_{in}" /></div>
 
 ちなみに、変形すると Full Adder の時と同じ。
+
+<!-- <div align="left"><img src="https://latex.codecogs.com/svg.latex?\\
+    = a\cdot b + (a\oplus b)\cdot c_{in} \\
+    = a\cdot b + (\overline{a}\cdot b + a\cdot\overline{b})\cdot c_{in}\\
+    = a\cdot b + \overline{a}\cdot b\cdot c_{in} + a\cdot\overline{b}\cdot c_{in} + a\cdot b\cdot c_{in}\\
+    = a\cdot b + b\cdot c_{in} + a\cdot c_{in}
+    "/></div>  <!-- --->
 
 <div align="left"><img src="https://latex.codecogs.com/svg.latex?\\%20%20%20%20=%20a\cdot%20b%20+%20(a\oplus%20b)\cdot%20c_{in}%20\\%20%20%20%20=%20a\cdot%20b%20+%20(\overline{a}\cdot%20b%20+%20a\cdot\overline{b})\cdot%20c_{in}\\%20%20%20%20=%20a\cdot%20b%20+%20\overline{a}\cdot%20b\cdot%20c_{in}%20+%20a\cdot\overline{b}\cdot%20c_{in}%20+%20a\cdot%20b\cdot%20c_{in}\\%20%20%20%20=%20a\cdot%20b%20+%20b\cdot%20c_{in}%20+%20a\cdot%20c_{in}" /></div>
 
@@ -25,15 +34,18 @@
     s_0 = a_0\oplus b_0\oplus c_{in} = p_0\oplus c_{in} \\
    	s_1 = a_1\oplus b_1\oplus c_0 = p_1\oplus c_0 \\
     s_2 = a_2\oplus b_2\oplus c_1 = p_2\oplus c_1  \\
-    s_3=a_3\oplus b_3\oplus c_2 = p_3\oplus c_2" /></div> <!-- --->
+    s_3 = a_3\oplus b_3\oplus c_2 = p_3\oplus c_2" /></div> <!-- --->
 
 <div align="left"><img src="https://latex.codecogs.com/svg.latex?\\%20%20%20%20s_0%20=%20a_0\oplus%20b_0\oplus%20c_{in}%20=%20p_0\oplus%20c_{in}%20\\%20%20%20s_1%20=%20a_1\oplus%20b_1\oplus%20c_0%20=%20p_1\oplus%20c_0%20\\%20%20%20%20s_2%20=%20a_2\oplus%20b_2\oplus%20c_1%20=%20p_2\oplus%20c_1%20%20\\%20%20%20%20s_3=a_3\oplus%20b_3\oplus%20c_2%20=%20p_3\oplus%20c_2" /></div>
 
 キャリーは Generator と Propagator を使って以下のように計算できる。
 
-<div align="left"><img src="https://latex.codecogs.com/svg.latex?\\
+<!-- <div align="left"><img src="https://latex.codecogs.com/svg.latex?\\
     c_0 = g_0 + p_0\cdot c_{in} = g_0 + p_0\cdot c_{in} \\
     c_1 = g_1 + p_1\cdot c_0 = g_1 + p_1\cdot g_0 + p_1\cdot p_0 \cdot c_{in} \\
     c_2 = g_2 + p_2\cdot c_1 = g_2 + p_2\cdot g_1 + p_2\cdot p_1 \cdot g_0 + p_2\cdot p_1 \cdot p_0\cdot c_{in} \\
-    c_3 = g_3 + p_3\cdot c_2 = g_3 + p_3\cdot g_2 + p_3\cdot p_2\cdot g_1 + p_3\cdot p_2\cdot p_1 \cdot g_0 + p_3\cdot p_2\cdot p_1 \cdot p_0\cdot c_{in}" /></div>
+    c_3 = g_3 + p_3\cdot c_2 = g_3 + p_3\cdot g_2 + p_3\cdot p_2\cdot g_1 + p_3\cdot p_2\cdot p_1 \cdot g_0 + p_3\cdot p_2\cdot p_1 \cdot p_0\cdot c_{in}" /></div> <!-- --->
+
+<div align="left"><img src="https://latex.codecogs.com/svg.latex?\\%20%20%20%20c_0%20=%20g_0%20+%20p_0\cdot%20c_{in}%20=%20g_0%20+%20p_0\cdot%20c_{in}%20\\%20%20%20%20c_1%20=%20g_1%20+%20p_1\cdot%20c_0%20=%20g_1%20+%20p_1\cdot%20g_0%20+%20p_1\cdot%20p_0%20\cdot%20c_{in}%20\\%20%20%20%20c_2%20=%20g_2%20+%20p_2\cdot%20c_1%20=%20g_2%20+%20p_2\cdot%20g_1%20+%20p_2\cdot%20p_1%20\cdot%20g_0%20+%20p_2\cdot%20p_1%20\cdot%20p_0\cdot%20c_{in}%20\\%20%20%20%20c_3%20=%20g_3%20+%20p_3\cdot%20c_2%20=%20g_3%20+%20p_3\cdot%20g_2%20+%20p_3\cdot%20p_2\cdot%20g_1%20+%20p_3\cdot%20p_2\cdot%20p_1%20\cdot%20g_0%20+%20p_3\cdot%20p_2\cdot%20p_1%20\cdot%20p_0\cdot%20c_{in}" /></div>
+
 
