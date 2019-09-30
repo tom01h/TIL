@@ -98,3 +98,5 @@ ck=0 の時 MSB は k+1 で、ck=1 の時 MSB は k である。
 <div align="left"><img src="https://latex.codecogs.com/svg.latex?\\%20%20%20%20\overline{p_{i+1}}\cdot((p_{i+2}\oplus%20g_{i+1}\oplus%20g_i)%20+%20(p_{i+2}\oplus%20e_{i+1}\oplus%20e_i))%20=%201" /></div>
 
 となる最大の *i* に対して、*sign^ci*=1 の時 MSB は i+1 で、*sign^ci*=0 の時 MSB は i である。
+
+愚直な実装をすると [こう](https://github.com/tom01h/TIL/blob/1043fd14e0fae60c8c98bedfd7fb733981fa8219/adder/LeadingZeroDetectionAdder/lza.v) なると思いますが、正規化シフトの準備として使う場合は最後の +1 ビットのシフトは現物合わせのほうが効率よいと思います。
