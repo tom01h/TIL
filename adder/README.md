@@ -48,6 +48,34 @@
 
 <div align="left"><img src="https://latex.codecogs.com/svg.latex?\\%20%20%20%20c_0%20=%20g_0%20+%20p_0\cdot%20c_{in}%20=%20g_0%20+%20p_0\cdot%20c_{in}%20\\%20%20%20%20c_1%20=%20g_1%20+%20p_1\cdot%20c_0%20=%20g_1%20+%20p_1\cdot%20g_0%20+%20p_1\cdot%20p_0%20\cdot%20c_{in}%20\\%20%20%20%20c_2%20=%20g_2%20+%20p_2\cdot%20c_1%20=%20g_2%20+%20p_2\cdot%20g_1%20+%20p_2\cdot%20p_1%20\cdot%20g_0%20+%20p_2\cdot%20p_1%20\cdot%20p_0\cdot%20c_{in}%20\\%20%20%20%20c_3%20=%20g_3%20+%20p_3\cdot%20c_2%20=%20g_3%20+%20p_3\cdot%20g_2%20+%20p_3\cdot%20p_2\cdot%20g_1%20+%20p_3\cdot%20p_2\cdot%20p_1%20\cdot%20g_0%20+%20p_3\cdot%20p_2\cdot%20p_1%20\cdot%20p_0\cdot%20c_{in}" /></div>
 
+## Parallel Prefix Adder
+
+先の例では、遅延はビット長に比例した。つぎは *log2 ビット長* に比例する方式。
+
+2桁分の ***Propagator (p)*** と  ***Generator (g)*** の合成は
+
+<!-- <div align="left"><img src="https://latex.codecogs.com/svg.latex?\\
+    g_{i+1,i} = g_{i+1} + p_{i+1}\cdot g_i \\
+    p_{i+1,i} = p_{i+1}\cdot p_i" /></div> <!-- --->
+
+<div align="left"><img src="https://latex.codecogs.com/svg.latex?\\%20%20%20%20g_{i+1,i}%20=%20g_{i+1}%20+%20p_{i+1}\cdot%20g_i%20\\%20%20%20%20p_{i+1,i}%20=%20p_{i+1}\cdot%20p_i" /></div>
+
+同様に *j* 桁から *k* 桁までの *p, g* と *k+1* 桁から *i* 桁までの *p, g* の合成は
+
+<!-- <div align="left"><img src="https://latex.codecogs.com/svg.latex?\\
+    g_{i,j} = g_{i,k+1} + p_{i,k+1}\cdot g_{k,j} \\
+    p_{i,j} = p_{i,k+1}\cdot p_{k,j}" /></div> <!-- --->
+
+<div align="left"><img src="https://latex.codecogs.com/svg.latex?\\%20%20%20%20g_{i,j}%20=%20g_{i,k+1}%20+%20p_{i,k+1}\cdot%20g_{k,j}%20\\%20%20%20%20p_{i,j}%20=%20p_{i,k+1}\cdot%20p_{k,j}" /></div>
+
+合成方法はいろいろあるが、つぎは面積最大・遅延最小の例。
+
+### 例 KoggeStoneAdder
+
+次のように合成する。
+
+![](ksa.svg)
+
 ## Leading Zero Detection Adder
 
 ***Propagator (p)*** と ***Generator (g)*** に加え、キャリーを発生しない ***Eliminator (e)*** を用いる。
