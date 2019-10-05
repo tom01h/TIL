@@ -1,0 +1,6 @@
+[submodule "fma/berkeley-softfloat-3"]
+	path = fma/berkeley-softfloat-3
+	url = https://github.com/ucb-bar/berkeley-softfloat-3
+[submodule "fma/berkeley-testfloat-3"]
+	path = fma/berkeley-testfloat-3
+	url = https://github.com/ucb-bar/berkeley-testfloat-3
