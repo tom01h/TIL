@@ -21,7 +21,7 @@ module fmad_check
          flag[4] = 1'b1;
       end else if((z[62:52]==11'h7ff)&(z[51:0]!=0))begin
          rslt    = z|64'h00080000_00000000;
-         flag[4] = ~z[51]|((x[62:23]==11'h7ff)&~x[51]&(x[50:0]!=0))|((y[62:52]==11'h7ff)&~y[51]&(y[50:0]!=0));
+         flag[4] = ~z[51]|((x[62:52]==11'h7ff)&~x[51]&(x[50:0]!=0))|((y[62:52]==11'h7ff)&~y[51]&(y[50:0]!=0));
       end else if(((x[62:52]==11'h7ff)|(y[62:52]==11'h7ff))&((z[62:52]==11'h7ff)))begin
          if((x[63]^y[63])==z[63])begin
             rslt    = z[63:0];
@@ -126,17 +126,21 @@ module fmad
    assign muli = req_in_1 * req_in_2;
 
    logic [169:0]       aligni;
+   logic [54:0]        aligngi;
    
    always_comb begin
-      if(expd>-64)begin
-         aligni = {fracz,116'h0} >> (expd+64);
+      if(expd>53+117-64)begin
+         {aligni,aligngi} = {'h0,fracz};
+      end else if(expd>-64)begin
+         {aligni,aligngi} = {fracz,116'h0,55'h0} >> (expd+64);
       end else begin
-         aligni = {fracz,116'h0};
+         {aligni,aligngi} = {fracz,116'h0,55'h0};
       end
    end
 
    logic [105:0]       mul;
    logic [169:0]       align;
+   logic [54:0]        aligng;
    logic signed [12:0] expa;
    logic               sgnz;
    logic               sgnm;
@@ -150,48 +154,54 @@ module fmad
          end else begin
             expa <= expz-1;
          end
+         aligng <= aligngi;
          sgnz <= z[63];
          sgnm <= x[63]^y[63];
       end
    end
 
    logic [169:0]       addi;
+   logic [54:0]        addgi;
 
    always_comb begin
       if(sgnm^sgnz)begin
-         addi = mul - align;
+         {addi,addgi} = {mul,55'h0} - {align,aligng};
       end else begin
-         addi = mul + align;
+         {addi,addgi} = {mul,55'h0} + {align,aligng};
       end
    end
 
    logic [169:0]       add;
+   logic [54:0]        addg;
    logic [12:0]        expr;
    logic               sgnr;
 
    always_ff @(posedge clk) begin
       if(en1 & flag0[0])begin
-         add[169:0] <= addi;
+         add <= addi;
+         addg <= addgi;
          sgnr <= sgnm;
          expr <= expa;
       end
    end
 
-   logic [128:0]       nrmi,nrm0,nrm1,nrm2,nrm3,nrm4,nrm5,nrm6;
+   logic [256:0]       nrmi,nrm7;
+   logic [128:0]       nrm0,nrm1,nrm2,nrm3,nrm4,nrm5,nrm6;
    logic [1:0]         ssn;
 
-   logic [6:0]         nrmsft;                                // expr >= nrmsft : subnormal output
-   assign nrmsft[6] = (~(|nrmi[128: 64])|(&nrmi[128: 64]))& (expr[12:6]!=4'h0);
-   assign nrmsft[5] = (~(|nrm6[128: 96])|(&nrm6[128: 96]))&((expr[12:5]&{6'h1f,~nrmsft[6  ],1'b1})!=8'h0);
-   assign nrmsft[4] = (~(|nrm5[128:112])|(&nrm5[128:112]))&((expr[12:4]&{6'h1f,~nrmsft[6:5],1'b1})!=9'h0);
-   assign nrmsft[3] = (~(|nrm4[128:120])|(&nrm4[128:120]))&((expr[12:3]&{6'h1f,~nrmsft[6:4],1'b1})!=10'h0);
-   assign nrmsft[2] = (~(|nrm3[128:124])|(&nrm3[128:124]))&((expr[12:2]&{6'h1f,~nrmsft[6:3],1'b1})!=11'h0);
-   assign nrmsft[1] = (~(|nrm2[128:126])|(&nrm2[128:126]))&((expr[12:1]&{6'h1f,~nrmsft[6:2],1'b1})!=12'h0);
-   assign nrmsft[0] = (~(|nrm1[128:127])|(&nrm1[128:127]))&((expr[12:0]&{6'h3f,~nrmsft[6:1],1'b1})!=13'h0);
+   logic [7:0]         nrmsft;                                // expr >= nrmsft : subnormal output
+   assign nrmsft[7] = (~(| add[169: 41])|(& add[169: 41]))& (expr[12:7]!=6'h0);
+   assign nrmsft[6] = (~(|nrm7[256:192])|(&nrm7[256:192]))&((expr[12:6]&{5'h1f,~nrmsft[7  ],1'b1})!=7'h0);
+   assign nrmsft[5] = (~(|nrm6[128: 96])|(&nrm6[128: 96]))&((expr[12:5]&{5'h1f,~nrmsft[7:6],1'b1})!=8'h0);
+   assign nrmsft[4] = (~(|nrm5[128:112])|(&nrm5[128:112]))&((expr[12:4]&{5'h1f,~nrmsft[7:5],1'b1})!=9'h0);
+   assign nrmsft[3] = (~(|nrm4[128:120])|(&nrm4[128:120]))&((expr[12:3]&{5'h1f,~nrmsft[7:4],1'b1})!=10'h0);
+   assign nrmsft[2] = (~(|nrm3[128:124])|(&nrm3[128:124]))&((expr[12:2]&{5'h1f,~nrmsft[7:3],1'b1})!=11'h0);
+   assign nrmsft[1] = (~(|nrm2[128:126])|(&nrm2[128:126]))&((expr[12:1]&{5'h1f,~nrmsft[7:2],1'b1})!=12'h0);
+   assign nrmsft[0] = (~(|nrm1[128:127])|(&nrm1[128:127]))&((expr[12:0]&{5'h1f,~nrmsft[7:1],1'b1})!=13'h0);
 
-   assign nrmi = {add[169:42],(|add[41:0])};
-
-   assign nrm6 = (~nrmsft[6]) ? nrmi : { add[105:0], 23'h0};
+   assign nrmi = {add[169:0],addg[54:0],32'h0};
+   assign nrm7 = (~nrmsft[7]) ? nrmi : { add[ 41:0], addg[54:0],32'h0,128'h0};
+   assign nrm6 = (~nrmsft[6]) ? {nrm7[256:129],(|nrm7[128:0])} : {nrm7[192:65],(|nrm7[64:0])};
    assign nrm5 = (~nrmsft[5]) ? nrm6 : {nrm6[ 96:0], 32'h0};
    assign nrm4 = (~nrmsft[4]) ? nrm5 : {nrm5[112:0], 16'h0};
    assign nrm3 = (~nrmsft[3]) ? nrm4 : {nrm4[120:0],  8'h0};
@@ -201,7 +211,7 @@ module fmad
    assign ssn = {nrm0[73],(|nrm0[72:0])};
 
    wire [2:0]          grsn = {nrm0[75:74],(|ssn)};
-   wire                rnd = (~nrmi[128]) ? (grsn[1:0]==2'b11)|(grsn[2:1]==2'b11)
+   wire                rnd = (~nrmi[256]) ? (grsn[1:0]==2'b11)|(grsn[2:1]==2'b11)
                                           : ((grsn[1:0]==2'b00)|                          // inc
                                             ((grsn[1]^grsn[0])     &(grsn[0]))|          // rs=11
                                             ((grsn[2]^(|grsn[1:0]))&(grsn[1]^grsn[0]))); // gr=11
@@ -225,7 +235,7 @@ module fmad
          rslt[62:0] = 63'h7ff00000_00000000;
          flag[0] = 1'b1;
          flag[2] = 1'b1;
-      end else if(~nrm0[64])begin
+      end else if(~nrm0[128])begin
          rslt[62:0] = rsltr[62:0];
          flag[0] = |grsn[1:0] | (rsltr[62:52]==11'h7ff);
          flag[1] = ((rsltr[62:52]==11'h000)|((expn[10:0]==11'h000)&~ssn[1]))&(|grsn[1:0]);
