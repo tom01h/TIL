@@ -47,6 +47,46 @@ module fmad_check
 
 endmodule
 
+module mul
+  (
+   input logic         clk,
+   input logic         en,
+   output logic [79:0] out,
+   input logic [52:0]  req_in_1,
+   input logic [26:0]  req_in_2
+   );
+
+   always_ff @(posedge clk)begin
+      if(en)begin
+         out <= req_in_1 * req_in_2;
+      end
+   end
+
+endmodule
+
+module add
+  (
+   input logic          clk,
+   input logic          en,
+   output logic [169:0] out,
+   output logic [2:0]   outg,
+   input logic          sub,
+   input logic [109:0]  req_in_1,
+   input logic [172:0]  req_in_2
+   );
+
+   always_ff @(posedge clk)begin
+      if(en)begin
+         if(sub)begin
+            {out,outg} <= req_in_1 - req_in_2;
+         end else begin
+            {out,outg} <= req_in_1 + req_in_2;
+         end
+      end
+   end
+
+endmodule
+
 module fmad
   (
    input logic         clk,
@@ -118,89 +158,129 @@ module fmad
    wire signed [12:0]  expm = expx+expy-1023;
    wire signed [12:0]  expd = expm-expz;
 
-   logic [105:0]       muli;
+   logic [79:0]        mul0;
 
    wire [52:0]         req_in_1 = fracx[52:0];
    wire [52:0]         req_in_2 = fracy[52:0];
 
-   assign muli = req_in_1 * req_in_2;
+   mul mul0i
+     (
+      .clk(clk),
+      .en(en0),
+      .out(mul0),
+      .req_in_1(req_in_1),
+      .req_in_2(req_in_2[26:0])
+      );
 
-   logic [169:0]       aligni;
-   logic [54:0]        aligngi;
+   logic [169:0]       align0i;
+   logic [54:0]        aligng0i;
    
    always_comb begin
       if(expd>53+117-64)begin
-         {aligni,aligngi} = {'h0,fracz};
+         {align0i,aligng0i} = {'h0,fracz};
       end else if(expd>-64)begin
-         {aligni,aligngi} = {fracz,116'h0,55'h0} >> (expd+64);
+         {align0i,aligng0i} = {fracz,116'h0,55'h0} >> (expd+64);
       end else begin
-         {aligni,aligngi} = {fracz,116'h0,55'h0};
+         {align0i,aligng0i} = {fracz,116'h0,55'h0};
       end
    end
 
-   logic [105:0]       mul;
-   logic [169:0]       align;
-   logic [54:0]        aligng;
-   logic signed [12:0] expa;
-   logic               sgnz;
-   logic               sgnm;
+   logic [169:0]       align0;
+   logic [2:0]         aligng0;
+   logic signed [12:0] expa0;
+   logic               sgnz0;
+   logic               sgnm0;
 
    always_ff @(posedge clk) begin
       if(en0)begin
-         mul <= muli;
-         align <= aligni;
+         align0 <= align0i;
+         aligng0 <= {aligng0i[54:53],(|aligng0i[52:0])};
          if(expd>-64)begin
-            expa <= expm+63;
+            expa0 <= expm+63;
          end else begin
-            expa <= expz-1;
+            expa0 <= expz-1;
          end
-         aligng <= aligngi;
-         sgnz <= z[63];
-         sgnm <= x[63]^y[63];
+         sgnz0 <= z[63];
+         sgnm0 <= x[63]^y[63];
       end
    end
 
-   logic [169:0]       addi;
-   logic [54:0]        addgi;
+   logic [169:0]       add1;
+   logic [2:0]         addg1;
 
-   always_comb begin
-      if(sgnm^sgnz)begin
-         {addi,addgi} = {mul,55'h0} - {align,aligng};
-      end else begin
-         {addi,addgi} = {mul,55'h0} + {align,aligng};
-      end
-   end
+   add add1i
+     (
+      .clk(clk),
+      .en(en1 & flag0[0]),
+      .out(add1),
+      .outg(addg1),
+      .sub(sgnm0^sgnz0),
+      .req_in_1({mul0,3'b0}),
+      .req_in_2({align0,aligng0})
+      );
 
-   logic [169:0]       add;
-   logic [54:0]        addg;
-   logic [12:0]        expr;
-   logic               sgnr;
+   logic [79:0]        mul1;
+
+   mul mul1i
+     (
+      .clk(clk),
+      .en(en1 & flag0[0]),
+      .out(mul1),
+      .req_in_1(req_in_1),
+      .req_in_2(req_in_2[52:27])
+      );
+
+   logic [12:0]        expr1;
+   logic               sgnr1;
 
    always_ff @(posedge clk) begin
       if(en1 & flag0[0])begin
-         add <= addi;
-         addg <= addgi;
-         sgnr <= sgnm;
-         expr <= expa;
+         sgnr1 <= sgnm0;
+         expr1 <= expa0;
       end
    end
+
+   logic [169:0]       add2;
+   logic [2:0]         addg2;
+
+   add add2i
+     (
+      .clk(clk),
+      .en(en2 & flag1[0]),
+      .out(add2),
+      .outg(addg2),
+      .sub(1'b0),
+      .req_in_1({mul1,27'h0,3'b0}),
+      .req_in_2({add1,addg1})
+      );
+
+   logic [12:0]        expr2;
+   logic               sgnr2;
+
+   always_ff @(posedge clk) begin
+      if(en2 & flag1[0])begin
+         sgnr2 <= sgnr1;
+         expr2 <= expr1;
+      end
+   end
+
 
    logic [256:0]       nrmi,nrm7;
    logic [128:0]       nrm0,nrm1,nrm2,nrm3,nrm4,nrm5,nrm6;
    logic [1:0]         ssn;
 
    logic [7:0]         nrmsft;                                // expr >= nrmsft : subnormal output
-   assign nrmsft[7] = (~(| add[169: 41])|(& add[169: 41]))& (expr[12:7]!=6'h0);
-   assign nrmsft[6] = (~(|nrm7[256:192])|(&nrm7[256:192]))&((expr[12:6]&{5'h1f,~nrmsft[7  ],1'b1})!=7'h0);
-   assign nrmsft[5] = (~(|nrm6[128: 96])|(&nrm6[128: 96]))&((expr[12:5]&{5'h1f,~nrmsft[7:6],1'b1})!=8'h0);
-   assign nrmsft[4] = (~(|nrm5[128:112])|(&nrm5[128:112]))&((expr[12:4]&{5'h1f,~nrmsft[7:5],1'b1})!=9'h0);
-   assign nrmsft[3] = (~(|nrm4[128:120])|(&nrm4[128:120]))&((expr[12:3]&{5'h1f,~nrmsft[7:4],1'b1})!=10'h0);
-   assign nrmsft[2] = (~(|nrm3[128:124])|(&nrm3[128:124]))&((expr[12:2]&{5'h1f,~nrmsft[7:3],1'b1})!=11'h0);
-   assign nrmsft[1] = (~(|nrm2[128:126])|(&nrm2[128:126]))&((expr[12:1]&{5'h1f,~nrmsft[7:2],1'b1})!=12'h0);
-   assign nrmsft[0] = (~(|nrm1[128:127])|(&nrm1[128:127]))&((expr[12:0]&{5'h1f,~nrmsft[7:1],1'b1})!=13'h0);
+   assign nrmsft[7] = (~(|add2[169: 41])|(&add2[169: 41]))& (expr2[12:7]!=6'h0);
+   assign nrmsft[6] = (~(|nrm7[256:192])|(&nrm7[256:192]))&((expr2[12:6]&{5'h1f,~nrmsft[7  ],1'b1})!=7'h0);
+   assign nrmsft[5] = (~(|nrm6[128: 96])|(&nrm6[128: 96]))&((expr2[12:5]&{5'h1f,~nrmsft[7:6],1'b1})!=8'h0);
+   assign nrmsft[4] = (~(|nrm5[128:112])|(&nrm5[128:112]))&((expr2[12:4]&{5'h1f,~nrmsft[7:5],1'b1})!=9'h0);
+   assign nrmsft[3] = (~(|nrm4[128:120])|(&nrm4[128:120]))&((expr2[12:3]&{5'h1f,~nrmsft[7:4],1'b1})!=10'h0);
+   assign nrmsft[2] = (~(|nrm3[128:124])|(&nrm3[128:124]))&((expr2[12:2]&{5'h1f,~nrmsft[7:3],1'b1})!=11'h0);
+   assign nrmsft[1] = (~(|nrm2[128:126])|(&nrm2[128:126]))&((expr2[12:1]&{5'h1f,~nrmsft[7:2],1'b1})!=12'h0);
+   assign nrmsft[0] = (~(|nrm1[128:127])|(&nrm1[128:127]))&((expr2[12:0]&{5'h1f,~nrmsft[7:1],1'b1})!=13'h0);
 
-   assign nrmi = {add[169:0],addg[54:0],32'h0};
-   assign nrm7 = (~nrmsft[7]) ? nrmi : { add[ 41:0], addg[54:0],32'h0,128'h0};
+   assign nrmi = {add2[169:0],addg2[2:0],84'h0};
+   assign nrm7 = (~nrmsft[7]) ? nrmi : { add2[ 41:0], addg2[2:0],84'h0,128'h0};
    assign nrm6 = (~nrmsft[6]) ? {nrm7[256:129],(|nrm7[128:0])} : {nrm7[192:65],(|nrm7[64:0])};
    assign nrm5 = (~nrmsft[5]) ? nrm6 : {nrm6[ 96:0], 32'h0};
    assign nrm4 = (~nrmsft[4]) ? nrm5 : {nrm5[112:0], 16'h0};
@@ -215,16 +295,16 @@ module fmad
                                           : ((grsn[1:0]==2'b00)|                          // inc
                                             ((grsn[1]^grsn[0])     &(grsn[0]))|          // rs=11
                                             ((grsn[2]^(|grsn[1:0]))&(grsn[1]^grsn[0]))); // gr=11
-   wire [13:0]         expn = expr-nrmsft+{1'b0,(nrm0[128]^nrm0[127])}; // subnormal(+0) or normal(+1)
+   wire [13:0]         expn = expr2-nrmsft+{1'b0,(nrm0[128]^nrm0[127])}; // subnormal(+0) or normal(+1)
 
    wire [62:0]         rsltr = (~nrm0[128]) ? {expn,nrm0[126:75]}+rnd : {expn,~nrm0[126:75]}+rnd;
 
    always @ (*) begin
-      rslt[63] = sgnr^add[169];
+      rslt[63] = sgnr2^add2[169];
       flag = 0;
-      if(flag1[0] == 1'b0)begin
-         rslt = rslt1;
-         flag = flag1;
+      if(flag2[0] == 1'b0)begin
+         rslt = rslt2;
+         flag = flag2;
       end else if(nrmi==0)begin
          rslt[63:0] = 64'h00000000_00000000;
       end else if(expn[13])begin
