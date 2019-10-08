@@ -14,11 +14,14 @@ VERILATOR_OPTS = \
 	-Wno-fatal \
 	--Mdir sim \
 	--trace \
+	--prefix Vfma \
 
 VERILATOR_MAKE_OPTS = OPT_FAST="-O3"
 
 DESIGN_SRCS = \
-fma.sv \
+fmad.sv \
+
+TOP = fmad_top.sv
 
 TB = fmad_tb.cpp
 
@@ -26,8 +29,8 @@ default: $(SIM_DIR)/Vfma
 
 sim: $(SIM_DIR)/Vfma
 
-$(SIM_DIR)/Vfma: $(DESIGN_SRCS) $(TB)
-	$(VERILATOR) $(VERILATOR_OPTS) $(DESIGN_SRCS) --exe ../$(TB)
+$(SIM_DIR)/Vfma: $(TOP) $(DESIGN_SRCS) $(TB)
+	$(VERILATOR) $(VERILATOR_OPTS) $(TOP) $(DESIGN_SRCS) --exe ../$(TB)
 	cd sim; make $(VERILATOR_MAKE_OPTS) -f Vfma.mk Vfma__ALL.a
 	cd sim; make $(VERILATOR_MAKE_OPTS) -f Vfma.mk Vfma
 
