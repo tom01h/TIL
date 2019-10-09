@@ -1,11 +1,11 @@
 typedef struct packed {
    logic       en;
-   logic [52:0] req_in_1;
+   logic [26:0] req_in_1;
    logic [26:0] req_in_2;
 } mulit;
 
 typedef struct packed {
-   logic [79:0] out;
+   logic [53:0] out;
 } mulot;
 
 typedef struct packed {
@@ -33,30 +33,43 @@ module fma
    output logic [4:0]  flag
    );
 
-   mulit muli0;
-   mulot mulo0;
-   mulit muli1;
-   mulot mulo1;
-   mulit mulis;
-   mulot mulos;
+   mulit muli00,muli01;
+   mulot mulo00,mulo01;
+   mulit muli10,muli11;
+   mulot mulo10,mulo11;
+   mulit mulis0,mulis1;
+   mulot mulos0,mulos1;
 
    always_comb begin
-      if(muli0.en)begin
-         mulis = muli0;
+      if(muli00.en)begin
+         mulis0 = muli00;
+         mulis1 = muli01;
       end else begin
-         mulis = muli1;
+         mulis0 = muli10;
+         mulis1 = muli11;
       end
-      mulo0 = mulos;
-      mulo1 = mulos;
+      mulo00 = mulos0;
+      mulo01 = mulos1;
+      mulo10 = mulos0;
+      mulo11 = mulos1;
    end
 
    mul0 mul0
      (
       .clk(clk),
-      .en(mulis.en),
-      .out(mulos.out[79:0]),
-      .req_in_1(mulis.req_in_1[52:0]),
-      .req_in_2(mulis.req_in_2[26:0])
+      .en(mulis0.en),
+      .out(mulos0.out[53:0]),
+      .req_in_1(mulis0.req_in_1[26:0]),
+      .req_in_2(mulis0.req_in_2[26:0])
+   );
+
+   mul0 mul1
+     (
+      .clk(clk),
+      .en(mulis1.en),
+      .out(mulos1.out[53:0]),
+      .req_in_1(mulis1.req_in_1[26:0]),
+      .req_in_2(mulis1.req_in_2[26:0])
    );
 
    addit addi1;
@@ -98,10 +111,14 @@ module fma
       .z(z[63:0]),
       .rslt(rslt[63:0]),
       .flag(flag[4:0]),
-      .muli0(muli0),
-      .mulo0(mulo0),
-      .muli1(muli1),
-      .mulo1(mulo1),
+      .muli00(muli00),
+      .mulo00(mulo00),
+      .muli01(muli01),
+      .mulo01(mulo01),
+      .muli10(muli10),
+      .mulo10(mulo10),
+      .muli11(muli11),
+      .mulo11(mulo11),
       .addi1(addi1),
       .addo1(addo1),
       .addi2(addi2),

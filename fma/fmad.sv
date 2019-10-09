@@ -51,8 +51,8 @@ module mul0
   (
    input logic         clk,
    input logic         en,
-   output logic [79:0] out,
-   input logic [52:0]  req_in_1,
+   output logic [53:0] out,
+   input logic [26:0]  req_in_1,
    input logic [26:0]  req_in_2
    );
 
@@ -98,10 +98,10 @@ module fmad
    input logic [63:0]  z,
    output logic [63:0] rslt,
    output logic [4:0]  flag,
-   output              mulit muli0,
-   input               mulot mulo0,
-   output              mulit muli1,
-   input               mulot mulo1,
+   output              mulit muli00, muli01,
+   input               mulot mulo00, mulo01,
+   output              mulit muli10, muli11,
+   input               mulot mulo10, mulo11,
    output              addit addi1,
    input               addot addo1,
    output              addit addi2,
@@ -127,7 +127,7 @@ module fmad
       end
    end
 
-   logic[4:0]         flag0i;
+   logic [4:0]        flag0i;
    logic [63:0]       rslt0i;
    logic [4:0]        flag0, flag1, flag2;
    logic [63:0]       rslt0, rslt1, rslt2;
@@ -166,20 +166,31 @@ module fmad
    wire signed [12:0]  expm = expx+expy-1023;
    wire signed [12:0]  expd = expm-expz;
 
-   logic [79:0]        mul0;
+   logic [53:0]        mul00, mul01;
 
    wire [52:0]         req_in_1 = fracx[52:0];
    wire [52:0]         req_in_2 = fracy[52:0];
 
-   mul mul0i
+   mul mul00i
      (
       .clk(clk),
       .en(en0),
-      .out(mul0),
-      .req_in_1(req_in_1),
+      .out(mul00),
+      .req_in_1(req_in_1[26:0]),
       .req_in_2(req_in_2[26:0]),
-      .muli(muli0),
-      .mulo(mulo0)
+      .muli(muli00),
+      .mulo(mulo00)
+      );
+
+   mul mul01i
+     (
+      .clk(clk),
+      .en(en0),
+      .out(mul01),
+      .req_in_1(req_in_1[52:27]),
+      .req_in_2(req_in_2[26:0]),
+      .muli(muli01),
+      .mulo(mulo01)
       );
 
    logic [169:0]       align0i;
@@ -225,23 +236,34 @@ module fmad
       .out(add1),
       .outg(addg1),
       .sub(sgnm0^sgnz0),
-      .req_in_1({mul0,3'b0}),
+      .req_in_1({mul00,3'b0}+{mul01,27'h0,3'b0}),
       .req_in_2({align0,aligng0}),
       .addi(addi1),
       .addo(addo1)
       );
 
-   logic [79:0]        mul1;
+   logic [53:0]        mul10,mul11;
 
-   mul mul1i
+   mul mul10i
      (
       .clk(clk),
       .en(en1 & flag0[0]),
-      .out(mul1),
-      .req_in_1(req_in_1),
+      .out(mul10),
+      .req_in_1(req_in_1[26:0]),
       .req_in_2(req_in_2[52:27]),
-      .muli(muli1),
-      .mulo(mulo1)
+      .muli(muli10),
+      .mulo(mulo10)
+      );
+
+   mul mul11i
+     (
+      .clk(clk),
+      .en(en1 & flag0[0]),
+      .out(mul11),
+      .req_in_1(req_in_1[52:27]),
+      .req_in_2(req_in_2[52:27]),
+      .muli(muli11),
+      .mulo(mulo11)
       );
 
    logic [12:0]        expr1;
@@ -264,7 +286,7 @@ module fmad
       .out(add2),
       .outg(addg2),
       .sub(1'b0),
-      .req_in_1({mul1,27'h0,3'b0}),
+      .req_in_1({mul10,27'h0,3'b0}+{mul11,27'h0,27'h0,3'b0}),
       .req_in_2({add1,addg1}),
       .addi(addi2),
       .addo(addo2)
