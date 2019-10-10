@@ -11,13 +11,16 @@ typedef struct packed {
 typedef struct packed {
    logic       en;
    logic       sub;
-   logic [109:0] req_in_1;
-   logic [172:0] req_in_2;
+   logic [1:0] cin;
+   logic [79:0] req_in_0;
+   logic [79:0] req_in_1;
+   logic [79:0] req_in_2;
+   logic [79:0] req_in_3;
 } addit;
 
 typedef struct packed {
-   logic [169:0] out;
-   logic [2:0]   outg;
+   logic [65:64] cout;
+   logic [81:0]  out;
 } addot;
 
 module fma
@@ -37,10 +40,10 @@ module fma
    mulot mulo00,mulo01;
    mulit muli10,muli11;
    mulot mulo10,mulo11;
-   addit addi1;
-   addot addo1;
-   addit addi2;
-   addot addo2;
+   addit addi10,addi11;
+   addot addo10,addo11;
+   addit addi20,addi21;
+   addot addo20,addo21;
 
    fmad fmad
      (
@@ -61,10 +64,14 @@ module fma
       .mulo10(mulo10),
       .muli11(muli11),
       .mulo11(mulo11),
-      .addi1(addi1),
-      .addo1(addo1),
-      .addi2(addi2),
-      .addo2(addo2)
+      .addi10(addi10),
+      .addo10(addo10),
+      .addi11(addi11),
+      .addo11(addo11),
+      .addi20(addi20),
+      .addo20(addo20),
+      .addi21(addi21),
+      .addo21(addo21)
       );
 
 endmodule
@@ -95,11 +102,14 @@ module add
   (
    input logic          clk,
    input logic          en,
-   output logic [169:0] out,
-   output logic [2:0]   outg,
+   output logic [65:64] cout,
+   output logic [81:0]  out,
    input logic          sub,
-   input logic [109:0]  req_in_1,
-   input logic [172:0]  req_in_2,
+   input logic [1:0]    cin,
+   input logic [79:0]   req_in_0,
+   input logic [79:0]   req_in_1,
+   input logic [79:0]   req_in_2,
+   input logic [79:0]   req_in_3,
    output               addit addi,
    input                addot addo
    );
@@ -108,11 +118,14 @@ module add
      (
       .clk(clk),
       .en(en),
-      .out(out[169:0]),
-      .outg(outg[2:0]),
+      .cout(cout[65:64]),
+      .out(out[81:0]),
       .sub(sub),
-      .req_in_1(req_in_1[109:0]),
-      .req_in_2(req_in_2[172:0])
+      .cin(cin[1:0]),
+      .req_in_0(req_in_0[79:0]),
+      .req_in_1(req_in_1[79:0]),
+      .req_in_2(req_in_2[79:0]),
+      .req_in_3(req_in_3[79:0])
    );
 
 endmodule

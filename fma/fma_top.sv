@@ -11,13 +11,16 @@ typedef struct packed {
 typedef struct packed {
    logic       en;
    logic       sub;
-   logic [109:0] req_in_1;
-   logic [172:0] req_in_2;
+   logic [1:0] cin;
+   logic [79:0] req_in_0;
+   logic [79:0] req_in_1;
+   logic [79:0] req_in_2;
+   logic [79:0] req_in_3;
 } addit;
 
 typedef struct packed {
-   logic [169:0] out;
-   logic [2:0]   outg;
+   logic [65:64] cout;
+   logic [81:0]  out;
 } addot;
 
 module fma
@@ -72,32 +75,53 @@ module fma
       .req_in_2(mulis1.req_in_2[26:0])
    );
 
-   addit addi1;
-   addot addo1;
-   addit addi2;
-   addot addo2;
-   addit addis;
-   addot addos;
+   addit addi10,addi11;
+   addot addo10,addo11;
+   addit addi20,addi21;
+   addot addo20,addo21;
+   addit addis0,addis1;
+   addot addos0,addos1;
 
    always_comb begin
-      if(addi1.en)begin
-         addis = addi1;
+      if(addi10.en)begin
+         addis0 = addi10;
+         addis1 = addi11;
       end else begin
-         addis = addi2;
+         addis0 = addi20;
+         addis1 = addi21;
       end
-      addo1 = addos;
-      addo2 = addos;
+      addo10 = addos0;
+      addo11 = addos1;
+      addo20 = addos0;
+      addo21 = addos1;
    end
 
    add0 add0
      (
       .clk(clk),
-      .en(addis.en),
-      .out(addos.out[169:0]),
-      .outg(addos.outg[2:0]),
-      .sub(addis.sub),
-      .req_in_1(addis.req_in_1[109:0]),
-      .req_in_2(addis.req_in_2[172:0])
+      .en(addis0.en),
+      .cout(addos0.cout[65:64]),
+      .out(addos0.out[81:0]),
+      .sub(addis0.sub),
+      .cin(addis0.cin[1:0]),
+      .req_in_0(addis0.req_in_0[79:0]),
+      .req_in_1(addis0.req_in_1[79:0]),
+      .req_in_2(addis0.req_in_2[79:0]),
+      .req_in_3(addis0.req_in_3[79:0])
+   );
+
+   add0 add1
+     (
+      .clk(clk),
+      .en(addis1.en),
+      .cout(addos1.cout[65:64]),
+      .out(addos1.out[81:0]),
+      .sub(addis1.sub),
+      .cin(addis1.cin[1:0]),
+      .req_in_0(addis1.req_in_0[79:0]),
+      .req_in_1(addis1.req_in_1[79:0]),
+      .req_in_2(addis1.req_in_2[79:0]),
+      .req_in_3(addis1.req_in_3[79:0])
    );
 
    fmad fmad
@@ -119,10 +143,14 @@ module fma
       .mulo10(mulo10),
       .muli11(muli11),
       .mulo11(mulo11),
-      .addi1(addi1),
-      .addo1(addo1),
-      .addi2(addi2),
-      .addo2(addo2)
+      .addi10(addi10),
+      .addo10(addo10),
+      .addi11(addi11),
+      .addo11(addo11),
+      .addi20(addi20),
+      .addo20(addo20),
+      .addi21(addi21),
+      .addo21(addo21)
       );
 
 endmodule
@@ -149,20 +177,26 @@ module add
   (
    input logic          clk,
    input logic          en,
-   output logic [169:0] out,
-   output logic [2:0]   outg,
+   output logic [65:64] cout,
+   output logic [81:0]  out,
    input logic          sub,
-   input logic [109:0]  req_in_1,
-   input logic [172:0]  req_in_2,
+   input logic [1:0]    cin,
+   input logic [79:0]   req_in_0,
+   input logic [79:0]   req_in_1,
+   input logic [79:0]   req_in_2,
+   input logic [79:0]   req_in_3,
    output               addit addi,
    input                addot addo
    );
 
    assign addi.en = en;
    assign addi.sub = sub;
+   assign addi.cin = cin;
+   assign addi.req_in_0 = req_in_0;
    assign addi.req_in_1 = req_in_1;
    assign addi.req_in_2 = req_in_2;
+   assign addi.req_in_3 = req_in_3;
+   assign cout = addo.cout;
    assign out = addo.out;
-   assign outg = addo.outg;
 
 endmodule

@@ -68,20 +68,38 @@ module add0
   (
    input logic          clk,
    input logic          en,
-   output logic [169:0] out,
-   output logic [2:0]   outg,
+   output logic [65:64] cout,
+   output logic [81:0] out,
    input logic          sub,
-   input logic [109:0]  req_in_1,
-   input logic [172:0]  req_in_2
+   input logic [1:0]    cin,
+   input logic [79:0]  req_in_0,
+   input logic [79:0]  req_in_1,
+   input logic [79:0]  req_in_2,
+   input logic [79:0]  req_in_3
    );
+
+   logic [81:64]       sumh;
+   logic [65:0]         suml;
+
+   assign cout = suml[65:64];
+
+   always_comb begin
+      if(sub)begin
+         suml = {1'b0, req_in_3[63: 0]} + {1'b0, req_in_2[63: 0]} +
+                {1'b0,~req_in_1[63: 0]} + {1'b0,~req_in_0[63: 0]} + cin;
+         sumh =        req_in_3[79:64]  +        req_in_2[79:64]  +
+                      ~req_in_1[79:64]  +       ~req_in_0[79:64]  + suml[65:64];
+      end else begin
+         suml = {1'b0, req_in_3[63: 0]} + {1'b0, req_in_2[63: 0]} +
+                {1'b0, req_in_1[63: 0]} + {1'b0, req_in_0[63: 0]} + cin;
+         sumh =        req_in_3[79:64]  +        req_in_2[79:64]  +
+                       req_in_1[79:64]  +        req_in_0[79:64]  + suml[65:64];
+      end
+   end
 
    always_ff @(posedge clk)begin
       if(en)begin
-         if(sub)begin
-            {out,outg} <= req_in_1 - req_in_2;
-         end else begin
-            {out,outg} <= req_in_1 + req_in_2;
-         end
+         out <= {sumh,suml[63:0]};
       end
    end
 
@@ -93,7 +111,7 @@ module fmad
    input logic         reset,
    input logic         req,
    input integer       req_command,
-   input logic [63:0]  x,
+   input logic [63:0]   x,
    input logic [63:0]  y,
    input logic [63:0]  z,
    output logic [63:0] rslt,
@@ -102,10 +120,10 @@ module fmad
    input               mulot mulo00, mulo01,
    output              mulit muli10, muli11,
    input               mulot mulo10, mulo11,
-   output              addit addi1,
-   input               addot addo1,
-   output              addit addi2,
-   input               addot addo2
+   output              addit addi10, addi11,
+   input               addot addo10, addo11,
+   output              addit addi20, addi21,
+   input               addot addo20, addo21
    );
 
    logic               en0, en1, en2;
@@ -226,20 +244,39 @@ module fmad
       end
    end
 
-   logic [169:0]       add1;
-   logic [2:0]         addg1;
+   logic [145:0]       add1;
+   logic [65:64]       cout1;
 
-   add add1i
+   add add10i
      (
       .clk(clk),
       .en(en1 & flag0[0]),
-      .out(add1),
-      .outg(addg1),
+      .cout(cout1),
+      .out(add1[63:0]),
       .sub(sgnm0^sgnz0),
-      .req_in_1({mul00,3'b0}+{mul01,27'h0,3'b0}),
-      .req_in_2({align0,aligng0}),
-      .addi(addi1),
-      .addo(addo1)
+      .cin({sgnm0^sgnz0,1'b0}),
+      .req_in_0(mul00),
+      .req_in_1({mul01[36:0],27'h0}),
+      .req_in_2(align0[63:0]),
+      .req_in_3(64'h0),
+      .addi(addi10),
+      .addo(addo10)
+      );
+
+   add add11i
+     (
+      .clk(clk),
+      .en(en1 & flag0[0]),
+      .cout(),
+      .out(add1[145:64]),
+      .sub(sgnm0^sgnz0),
+      .cin(cout1),
+      .req_in_0(64'h0),
+      .req_in_1(mul01[53:37]),
+      .req_in_2(align0[143:64]),
+      .req_in_3(64'h0),
+      .addi(addi11),
+      .addo(addo11)
       );
 
    logic [53:0]        mul10,mul11;
@@ -267,41 +304,72 @@ module fmad
       );
 
    logic [12:0]        expr1;
-   logic               sgnr1;
+   logic               sgnz1;
+   logic               sgnm1;
+   logic [2:0]         addg1;
+   logic [169:144]     align1;
 
    always_ff @(posedge clk) begin
       if(en1 & flag0[0])begin
-         sgnr1 <= sgnm0;
+         sgnz1 <= sgnz0;
+         sgnm1 <= sgnm0;
          expr1 <= expa0;
+         addg1 <= aligng0;
+         align1 <= align0[169:144];
       end
    end
 
-   logic [169:0]       add2;
-   logic [2:0]         addg2;
+   logic [169:27]      add2h;
+   logic [65:64]       cout2;
 
-   add add2i
+   add add20i
      (
       .clk(clk),
       .en(en2 & flag1[0]),
-      .out(add2),
-      .outg(addg2),
-      .sub(1'b0),
-      .req_in_1({mul10,27'h0,3'b0}+{mul11,27'h0,27'h0,3'b0}),
-      .req_in_2({add1,addg1}),
-      .addi(addi2),
-      .addo(addo2)
+      .cout(cout2),
+      .out(add2h[63+27:27]),
+      .sub(sgnz1^sgnm1),
+      .cin({sgnm1^sgnz1,1'b0}),
+      .req_in_0(mul10),
+      .req_in_1({mul11[36:0],27'h0}),
+      .req_in_2(add1[63+27:27]),
+      .req_in_3(64'h0),
+      .addi(addi20),
+      .addo(addo20)
+      );
+
+   add add21i
+     (
+      .clk(clk),
+      .en(en2 & flag1[0]),
+      .cout(),
+      .out(add2h[169:64+27]),
+      .sub(sgnz1^sgnm1),
+      .cin(cout2),
+      .req_in_0(64'h0),
+      .req_in_1(mul11[53:37]),
+      .req_in_2({{25{add1[145]}},add1[144:64+27]}),
+      .req_in_3({align1,53'h0}),
+      .addi(addi21),
+      .addo(addo21)
       );
 
    logic [12:0]        expr2;
    logic               sgnr2;
+   logic [2:0]         addg2;
+   logic [26:0]        add2l;
 
    always_ff @(posedge clk) begin
       if(en2 & flag1[0])begin
-         sgnr2 <= sgnr1;
+         sgnr2 <= sgnz1;
          expr2 <= expr1;
+         add2l[26:0] <= add1[26:0];
+         addg2 <= addg1;
       end
    end
 
+
+   wire [169:0]        add2 = {add2h,add2l};
 
    logic [256:0]       nrmi,nrm7;
    logic [128:0]       nrm0,nrm1,nrm2,nrm3,nrm4,nrm5,nrm6;
