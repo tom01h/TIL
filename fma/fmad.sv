@@ -47,64 +47,6 @@ module fmad_check
 
 endmodule
 
-module mul0
-  (
-   input logic         clk,
-   input logic         en,
-   output logic [53:0] out,
-   input logic [26:0]  req_in_1,
-   input logic [26:0]  req_in_2
-   );
-
-   always_ff @(posedge clk)begin
-      if(en)begin
-         out <= req_in_1 * req_in_2;
-      end
-   end
-
-endmodule
-
-module add0
-  (
-   input logic          clk,
-   input logic          en,
-   output logic [65:64] cout,
-   output logic [81:0] out,
-   input logic          sub,
-   input logic [1:0]    cin,
-   input logic [79:0]  req_in_0,
-   input logic [79:0]  req_in_1,
-   input logic [79:0]  req_in_2,
-   input logic [79:0]  req_in_3
-   );
-
-   logic [81:64]       sumh;
-   logic [65:0]         suml;
-
-   assign cout = suml[65:64];
-
-   always_comb begin
-      if(sub)begin
-         suml = {1'b0, req_in_3[63: 0]} + {1'b0, req_in_2[63: 0]} +
-                {1'b0,~req_in_1[63: 0]} + {1'b0,~req_in_0[63: 0]} + cin;
-         sumh =        req_in_3[79:64]  +        req_in_2[79:64]  +
-                      ~req_in_1[79:64]  +       ~req_in_0[79:64]  + suml[65:64];
-      end else begin
-         suml = {1'b0, req_in_3[63: 0]} + {1'b0, req_in_2[63: 0]} +
-                {1'b0, req_in_1[63: 0]} + {1'b0, req_in_0[63: 0]} + cin;
-         sumh =        req_in_3[79:64]  +        req_in_2[79:64]  +
-                       req_in_1[79:64]  +        req_in_0[79:64]  + suml[65:64];
-      end
-   end
-
-   always_ff @(posedge clk)begin
-      if(en)begin
-         out <= {sumh,suml[63:0]};
-      end
-   end
-
-endmodule
-
 module fmad
   (
    input logic         clk,
@@ -258,7 +200,10 @@ module fmad
       .req_in_0(mul00),
       .req_in_1({mul01[36:0],27'h0}),
       .req_in_2(align0[63:0]),
-      .req_in_3(64'h0),
+      .aln0(32'h0),
+      .aln1(32'h0),
+      .aln2(32'h0),
+      .aln3(32'h0),
       .addi(addi10),
       .addo(addo10)
       );
@@ -274,7 +219,10 @@ module fmad
       .req_in_0(64'h0),
       .req_in_1(mul01[53:37]),
       .req_in_2(align0[143:64]),
-      .req_in_3(64'h0),
+      .aln0(32'h0),
+      .aln1(32'h0),
+      .aln2(32'h0),
+      .aln3(32'h0),
       .addi(addi11),
       .addo(addo11)
       );
@@ -306,6 +254,7 @@ module fmad
    logic [12:0]        expr1;
    logic               sgnz1;
    logic               sgnm1;
+   logic               alnm1;
    logic [2:0]         addg1;
    logic [169:144]     align1;
 
@@ -314,6 +263,7 @@ module fmad
          sgnz1 <= sgnz0;
          sgnm1 <= sgnm0;
          expr1 <= expa0;
+         alnm1 <= (expd<-1);
          addg1 <= aligng0;
          align1 <= align0[169:144];
       end
@@ -322,7 +272,7 @@ module fmad
    logic [143:0]       add2in0, add2in1, add2in2, add2in3;
 
    always_comb  begin
-      if(expd<-1)begin
+      if(alnm1)begin
          add2in0 = mul10;
          add2in1 = {mul11,27'h0};
          add2in2 = {{25{add1[145]}},add1[144:27]};
@@ -349,7 +299,10 @@ module fmad
       .req_in_0(add2in0[63:0]),
       .req_in_1(add2in1[63:0]),
       .req_in_2(add2in2[63:0]),
-      .req_in_3(add2in3[63:0]),
+      .aln0(add2in3[63:48]),
+      .aln1(add2in3[47:32]),
+      .aln2(add2in3[31:16]),
+      .aln3(add2in3[15: 0]),
       .addi(addi20),
       .addo(addo20)
       );
@@ -365,7 +318,10 @@ module fmad
       .req_in_0(add2in0[143:64]),
       .req_in_1(add2in1[143:64]),
       .req_in_2(add2in2[143:64]),
-      .req_in_3(add2in3[143:64]),
+      .aln0(add2in3[143:112]),
+      .aln1(add2in3[111: 96]),
+      .aln2(add2in3[ 95: 80]),
+      .aln3(add2in3[ 79: 64]),
       .addi(addi21),
       .addo(addo21)
       );
@@ -377,7 +333,7 @@ module fmad
    always_ff @(posedge clk) begin
       if(en2 & flag1[0])begin
          sgnr2 <= sgnz1;
-         if(expd<-1)begin
+         if(alnm1)begin
             expr2 <= expr1;
             add2l[26:0] <= add1[26:0];
          end else begin

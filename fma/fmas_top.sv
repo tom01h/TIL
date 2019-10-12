@@ -1,6 +1,5 @@
 typedef struct packed {
    logic       en;
-   integer     req_command;
    logic [26:0] req_in_1;
    logic [26:0] req_in_2;
 } mulit;
@@ -11,9 +10,11 @@ typedef struct packed {
 
 typedef struct packed {
    logic       en;
-   integer     req_command;
-   logic [63:0] mul;
-   logic [4:0]  mulctl;
+   logic       sub;
+   logic [1:0] cin;
+   logic [79:0] req_in_0;
+   logic [79:0] req_in_1;
+   logic [79:0] req_in_2;
    logic [31:0] aln0;
    logic [31:0] aln1;
    logic [31:0] aln2;
@@ -21,6 +22,7 @@ typedef struct packed {
 } addit;
 
 typedef struct packed {
+   logic [65:64] cout;
    logic [81:0] addo;
 } addot;
 
@@ -65,7 +67,6 @@ module mul
   (
    input logic         clk,
    input logic         en,
-   input integer       req_command,
    output logic [53:0] out,
    input logic [26:0]  req_in_1,
    input logic [26:0]  req_in_2,
@@ -77,7 +78,6 @@ module mul
      (
       .clk(clk),
       .en(en),
-      .req_command(req_command),
       .out(out[53:0]),
       .req_in_1(req_in_1[26:0]),
       .req_in_2(req_in_2[26:0])
@@ -87,29 +87,38 @@ endmodule
 
 module add
   (
-   input logic         clk,
-   input logic         en,
-   input integer       req_command,
-   input logic [63:0]  mul,
-   input logic [4:0]   mulctl,
-   input logic [31:0]  aln0,
-   input logic [31:0]  aln1,
-   input logic [31:0]  aln2,
-   input logic [31:0]  aln3,
-   output logic [81:0] out,
-   output              addit addi,
-   input               addot addo
+   input logic          clk,
+   input logic          en,
+   output logic [65:64] cout,
+   output logic [81:0]  out,
+   input logic          sub,
+   input logic [1:0]    cin,
+   input logic [79:0]   req_in_0,
+   input logic [79:0]   req_in_1,
+   input logic [79:0]   req_in_2,
+   input logic [31:0]   aln0,
+   input logic [31:0]   aln1,
+   input logic [31:0]   aln2,
+   input logic [31:0]   aln3,
+   output               addit addi,
+   input                addot addo
    );
 
-   add0 add1i
+   add0 add0
      (
       .clk(clk),
       .en(en),
-      .req_command(req_command),
-      .mul(mul),
-      .mulctl(mulctl),
-      .aln0(aln0),      .aln1(aln1),      .aln2(aln2),      .aln3(aln3),
-      .out(out)
+      .cout(cout[65:64]),
+      .out(out[81:0]),
+      .sub(sub),
+      .cin(cin[1:0]),
+      .req_in_0(req_in_0[79:0]),
+      .req_in_1(req_in_1[79:0]),
+      .req_in_2(req_in_2[79:0]),
+      .aln0(aln0[31:0]),
+      .aln1(aln1[31:0]),
+      .aln2(aln2[31:0]),
+      .aln3(aln3[31:0])
    );
 
 endmodule

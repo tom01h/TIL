@@ -79,7 +79,7 @@ int main(int argc, char **argv, char **env) {
   tfp->open("tmp.vcd");
   main_time = 0;
 
-  verilator_top->req_command = 1;
+  verilator_top->req_command = 0;
 
   while ((i<nloop)|(argc==1)) {
     if(argc==2){

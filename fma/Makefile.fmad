@@ -19,6 +19,7 @@ VERILATOR_OPTS = \
 VERILATOR_MAKE_OPTS = OPT_FAST="-O3"
 
 DESIGN_SRCS = \
+lib.sv \
 fmad.sv \
 
 TOP = fmad_top.sv

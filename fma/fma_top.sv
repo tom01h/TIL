@@ -15,7 +15,10 @@ typedef struct packed {
    logic [79:0] req_in_0;
    logic [79:0] req_in_1;
    logic [79:0] req_in_2;
-   logic [79:0] req_in_3;
+   logic [31:0] aln0;
+   logic [31:0] aln1;
+   logic [31:0] aln2;
+   logic [31:0] aln3;
 } addit;
 
 typedef struct packed {
@@ -36,25 +39,47 @@ module fma
    output logic [4:0]  flag
    );
 
+   logic [63:0]        rsltd;
+   logic [4:0]         flagd;
+   logic [63:0]        rslts;
+   logic [4:0]         flags;
+
+   always_comb begin
+      if(req_command==0)begin
+         rslt = rslts;
+         flag =flags;
+      end else begin
+         rslt = rsltd;
+         flag =flagd;
+      end
+   end
+
    mulit muli00,muli01;
    mulot mulo00,mulo01;
    mulit muli10,muli11;
    mulot mulo10,mulo11;
    mulit mulis0,mulis1;
    mulot mulos0,mulos1;
+   mulit muli0;
+   mulot mulo0;
 
    always_comb begin
       if(muli00.en)begin
          mulis0 = muli00;
          mulis1 = muli01;
-      end else begin
+      end else if(muli10.en)begin
          mulis0 = muli10;
          mulis1 = muli11;
+      end else begin
+         mulis0 = muli0;
+         mulis1 = 0;
+         mulis1.en = 1'b0;
       end
       mulo00 = mulos0;
       mulo01 = mulos1;
       mulo10 = mulos0;
       mulo11 = mulos1;
+      mulo0 = mulos0;
    end
 
    mul0 mul0
@@ -81,19 +106,25 @@ module fma
    addot addo20,addo21;
    addit addis0,addis1;
    addot addos0,addos1;
+   addit addi1;
+   addot addo1;
 
    always_comb begin
       if(addi10.en)begin
          addis0 = addi10;
          addis1 = addi11;
-      end else begin
+      end else if(addi20.en)begin
          addis0 = addi20;
          addis1 = addi21;
+      end else begin
+         addis0 = addi1;
+         addis1 = 0;
       end
       addo10 = addos0;
       addo11 = addos1;
       addo20 = addos0;
       addo21 = addos1;
+      addo1 = addos0;
    end
 
    add0 add0
@@ -107,7 +138,10 @@ module fma
       .req_in_0(addis0.req_in_0[79:0]),
       .req_in_1(addis0.req_in_1[79:0]),
       .req_in_2(addis0.req_in_2[79:0]),
-      .req_in_3(addis0.req_in_3[79:0])
+      .aln0(addis0.aln0[31:0]),
+      .aln1(addis0.aln1[31:0]),
+      .aln2(addis0.aln2[31:0]),
+      .aln3(addis0.aln3[31:0])
    );
 
    add0 add1
@@ -121,20 +155,23 @@ module fma
       .req_in_0(addis1.req_in_0[79:0]),
       .req_in_1(addis1.req_in_1[79:0]),
       .req_in_2(addis1.req_in_2[79:0]),
-      .req_in_3(addis1.req_in_3[79:0])
+      .aln0(addis1.aln0[31:0]),
+      .aln1(addis1.aln1[31:0]),
+      .aln2(addis1.aln2[31:0]),
+      .aln3(addis1.aln3[31:0])
    );
 
    fmad fmad
      (
       .clk(clk),
       .reset(reset),
-      .req(req),
+      .req(req&(req_command==1)),
       .req_command(req_command),
       .x(x[63:0]),
       .y(y[63:0]),
       .z(z[63:0]),
-      .rslt(rslt[63:0]),
-      .flag(flag[4:0]),
+      .rslt(rsltd[63:0]),
+      .flag(flagd[4:0]),
       .muli00(muli00),
       .mulo00(mulo00),
       .muli01(muli01),
@@ -151,6 +188,23 @@ module fma
       .addo20(addo20),
       .addi21(addi21),
       .addo21(addo21)
+      );
+
+   fmas fmas
+     (
+      .clk(clk),
+      .reset(reset),
+      .req(req&(req_command==0)),
+      .req_command(req_command),
+      .x(x[31:0]),
+      .y(y[31:0]),
+      .z(z[31:0]),
+      .rslt(rslts[31:0]),
+      .flag(flags[4:0]),
+      .muli0(muli0),
+      .mulo0(mulo0),
+      .addi1(addi1),
+      .addo1(addo1)
       );
 
 endmodule
@@ -184,7 +238,10 @@ module add
    input logic [79:0]   req_in_0,
    input logic [79:0]   req_in_1,
    input logic [79:0]   req_in_2,
-   input logic [79:0]   req_in_3,
+   input logic [31:0]   aln0,
+   input logic [31:0]   aln1,
+   input logic [31:0]   aln2,
+   input logic [31:0]   aln3,
    output               addit addi,
    input                addot addo
    );
@@ -195,7 +252,10 @@ module add
    assign addi.req_in_0 = req_in_0;
    assign addi.req_in_1 = req_in_1;
    assign addi.req_in_2 = req_in_2;
-   assign addi.req_in_3 = req_in_3;
+   assign addi.aln0 = aln0;
+   assign addi.aln1 = aln1;
+   assign addi.aln2 = aln2;
+   assign addi.aln3 = aln3;
    assign cout = addo.cout;
    assign out = addo.out;
 

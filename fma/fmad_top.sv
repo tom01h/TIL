@@ -15,7 +15,10 @@ typedef struct packed {
    logic [79:0] req_in_0;
    logic [79:0] req_in_1;
    logic [79:0] req_in_2;
-   logic [79:0] req_in_3;
+   logic [31:0] aln0;
+   logic [31:0] aln1;
+   logic [31:0] aln2;
+   logic [31:0] aln3;
 } addit;
 
 typedef struct packed {
@@ -109,7 +112,10 @@ module add
    input logic [79:0]   req_in_0,
    input logic [79:0]   req_in_1,
    input logic [79:0]   req_in_2,
-   input logic [79:0]   req_in_3,
+   input logic [31:0]   aln0,
+   input logic [31:0]   aln1,
+   input logic [31:0]   aln2,
+   input logic [31:0]   aln3,
    output               addit addi,
    input                addot addo
    );
@@ -125,7 +131,10 @@ module add
       .req_in_0(req_in_0[79:0]),
       .req_in_1(req_in_1[79:0]),
       .req_in_2(req_in_2[79:0]),
-      .req_in_3(req_in_3[79:0])
+      .aln0(aln0[31:0]),
+      .aln1(aln1[31:0]),
+      .aln2(aln2[31:0]),
+      .aln3(aln3[31:0])
    );
 
 endmodule

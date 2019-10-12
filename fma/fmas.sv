@@ -47,66 +47,6 @@ module fmas_check
 
 endmodule
 
-module mul0
-  (
-   input logic         clk,
-   input logic         en,
-   input integer       req_command,
-   input logic [26:0]  req_in_1,
-   input logic [26:0]  req_in_2,
-   output logic [53:0] out
-   );
-
-   always_ff @(posedge clk)begin
-      if(en)begin
-         out <= req_in_1 * req_in_2;
-      end
-   end
-
-endmodule
-
-module add0
-  (
-   input logic         clk,
-   input logic         en,
-   input integer       req_command,
-   input logic [63:0]  mul,
-   input logic [4:0]   mulctl,
-   input logic [31:0]  aln0,
-   input logic [31:0]  aln1,
-   input logic [31:0]  aln2,
-   input logic [31:0]  aln3,
-   output logic [81:0] out
-   );
-   
-
-   wire [81:0]        alnmul = (((mulctl[4]) ? {16'h0,mul[63:0]} : {mul[47:0],32'h0}) ^
-                                {{34{mulctl[3]}},{16{mulctl[2]}},{16{mulctl[1]}},{16{mulctl[0]}}} );
-
-   logic              cin0, cin1, cin2, cin3;
-
-   wire [16:0]        sum01 = aln0[15: 0] + alnmul[63:48] + cin0;
-   wire [16:0]        sum11 = aln1[15: 0] + alnmul[47:32] + cin1;
-   wire [16:0]        sum21 = aln2[15: 0] + alnmul[31:16] + cin2;
-   wire [16:0]        sum31 = aln3[15: 0] + alnmul[15: 0] + cin3;
-   wire [17:0]        sum00 = aln0[31:16] + alnmul[81:64] + sum01[16];
-
-   always_comb begin
-      cin0 = sum11[16];
-      cin1 = sum21[16];
-      cin2 = sum31[16];
-      cin3 = (mulctl[0]==1'b1);
-   end
-
-   always_ff @(posedge clk)begin
-      if(en)begin
-         out <= {sum00[17:0], sum01[15:0], sum11[15:0], sum21[15:0], sum31[15:0]};
-         //out = alnmul + {1'b0, aln0[31:0], aln1[15:0], aln2[15:0], aln3[15:0]};
-      end
-   end
-
-endmodule
-
 module fmas
   (
    input logic         clk,
@@ -186,7 +126,6 @@ module fmas
      (
       .clk(clk),
       .en(en0 & flag0i[0]),
-      .req_command(req_command),
       .req_in_1(req_in_1),
       .req_in_2(req_in_2),
       .out(mul),
@@ -212,28 +151,28 @@ module fmas
    logic [31:0]      acc0, acc1, acc2, acc3;
    logic [5:0]       sft0, sft1, sft2, sft3;
 
-   logic [8:0]       expa;
-   logic             sgnz;
+   logic [8:0]       expa0;
+   logic             sgnz0;
+   logic             sgnm0;
 
-   logic [4:0]       mulctl;
-
-   logic [48:0]      aln0, aln1, aln2, aln3;
+   logic             alnm0;
 
    always_ff @ (posedge clk) begin
       if(en0 & flag0i[0])begin
-         sgnz <= z[31];
+         sgnz0 <= z[31];
+         sgnm0 <= x[31]^y[31];
          if(expd>=0)begin
-            expa <= expm;
+            expa0 <= expm;
          end else if(expd>=-32)begin
-            expa <= expm+32;
+            expa0 <= expm+32;
          end else begin
-            expa <= expz;
+            expa0 <= expz;
          end
 
          if(expd>=0)begin
-            mulctl <= {1'b0,{4{(x[31]^y[31]^z[31])}}};
+            alnm0 <= 1'b0;
          end else begin
-            mulctl <= {1'b1,{4{(x[31]^y[31]^z[31])}}};
+            alnm0 <= 1'b1;
          end
 
          if(sfti>=48)begin
@@ -253,11 +192,19 @@ module fmas
 
    end
 
+   logic [48:0]      aln0, aln1, aln2, aln3;
+   logic [79:0]      alnmul;
+
    always_comb begin
       aln0 = {acc0,16'h0}>>sft0;
       aln1 = {acc1,16'h0}>>sft1;
       aln2 = {acc2,16'h0}>>sft2;
       aln3 = {acc3,16'h0}>>sft3;
+      if(alnm0)begin
+         alnmul = {32'h0,mul[47:0]};
+      end else begin
+         alnmul = {mul[47:0],32'h0};
+      end
    end
 
    logic [81:0]      add;
@@ -266,22 +213,25 @@ module fmas
      (
       .clk(clk),
       .en(en1 & flag0[0]),
-      .req_command(req_command),//FIX ME
-      .mul({10'h0,mul}),
-      .mulctl(mulctl),
+      .cout(),
+      .sub(sgnm0^sgnz0),
+      .cin({sgnm0^sgnz0,1'b0}),
+      .req_in_0(alnmul),
+      .req_in_1('h0),
+      .req_in_2('h0),
       .aln0(aln0),      .aln1(aln1),      .aln2(aln2),      .aln3(aln3),
       .out(add),
       .addi(addi1),
       .addo(addo1)
    );
 
-   logic [8:0]       expr;
-   logic             sgnr;
+   logic [8:0]       expr1;
+   logic             sgnr1;
 
    always_ff @(posedge clk) begin
       if(en1 & flag0[0])begin
-         sgnr <= sgnz;
-         expr <= expa;
+         sgnr1 <= sgnz0;
+         expr1 <= expa0;
       end
    end
 
@@ -289,12 +239,12 @@ module fmas
    logic [1:0]   ssn;
 
    logic [5:0]   nrmsft;                                // expr >= nrmsft : subnormal output
-   assign nrmsft[5] = (~(|nrmi[64:32])|(&nrmi[64:32]))& (expr[8:5]!=4'h0);
-   assign nrmsft[4] = (~(|nrm5[64:48])|(&nrm5[64:48]))&((expr[8:4]&{3'h7,~nrmsft[5],  1'b1})!=5'h00);
-   assign nrmsft[3] = (~(|nrm4[64:56])|(&nrm4[64:56]))&((expr[8:3]&{3'h7,~nrmsft[5:4],1'b1})!=6'h00);
-   assign nrmsft[2] = (~(|nrm3[64:60])|(&nrm3[64:60]))&((expr[8:2]&{3'h7,~nrmsft[5:3],1'b1})!=7'h00);
-   assign nrmsft[1] = (~(|nrm2[64:62])|(&nrm2[64:62]))&((expr[8:1]&{3'h7,~nrmsft[5:2],1'b1})!=8'h00);
-   assign nrmsft[0] = (~(|nrm1[64:63])|(&nrm1[64:63]))&((expr[8:0]&{3'h7,~nrmsft[5:1],1'b1})!=9'h000);
+   assign nrmsft[5] = (~(|nrmi[64:32])|(&nrmi[64:32]))& (expr1[8:5]!=4'h0);
+   assign nrmsft[4] = (~(|nrm5[64:48])|(&nrm5[64:48]))&((expr1[8:4]&{3'h7,~nrmsft[5],  1'b1})!=5'h00);
+   assign nrmsft[3] = (~(|nrm4[64:56])|(&nrm4[64:56]))&((expr1[8:3]&{3'h7,~nrmsft[5:4],1'b1})!=6'h00);
+   assign nrmsft[2] = (~(|nrm3[64:60])|(&nrm3[64:60]))&((expr1[8:2]&{3'h7,~nrmsft[5:3],1'b1})!=7'h00);
+   assign nrmsft[1] = (~(|nrm2[64:62])|(&nrm2[64:62]))&((expr1[8:1]&{3'h7,~nrmsft[5:2],1'b1})!=8'h00);
+   assign nrmsft[0] = (~(|nrm1[64:63])|(&nrm1[64:63]))&((expr1[8:0]&{3'h7,~nrmsft[5:1],1'b1})!=9'h000);
 
    assign nrmi = {add[81:18],(|add[17:0])};
    assign nrm5 = (~nrmsft[5]) ? nrmi : {add[49:0], 15'h0};
@@ -310,12 +260,12 @@ module fmas
                                    : ((grsn[1:0]==2'b00)|                          // inc
                                       ((grsn[1]^grsn[0])     &(grsn[0]))|          // rs=11
                                       ((grsn[2]^(|grsn[1:0]))&(grsn[1]^grsn[0]))); // gr=11
-   wire [9:0]    expn = expr-nrmsft+{1'b0,(nrm0[64]^nrm0[63])}; // subnormal(+0) or normal(+1)
+   wire [9:0]    expn = expr1-nrmsft+{1'b0,(nrm0[64]^nrm0[63])}; // subnormal(+0) or normal(+1)
 
    wire [30:0]   rsltr = (~nrm0[64]) ? {expn,nrm0[62:40]}+rnd : {expn,~nrm0[62:40]}+rnd;
 
    always_comb begin
-      rslt[31] = sgnr^add[81];
+      rslt[31] = sgnr1^add[81];
       flag = 0;
       if(flag1[0] == 1'b0)begin
          rslt = rslt1;
