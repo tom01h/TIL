@@ -148,7 +148,7 @@ module fmas
       end
    end
 
-   logic [31:0]      acc0, acc1, acc2, acc3;
+   logic [47:0]      acc0, acc1, acc2, acc3;
    logic [5:0]       sft0, sft1, sft2, sft3;
 
    logic [8:0]       expa0;
@@ -175,18 +175,12 @@ module fmas
             alnm0 <= 1'b1;
          end
 
-         if(sfti>=48)begin
+         if(sfti>=32)begin
             acc0 <= 0;            acc1 <= fracz;            acc2 <= fracz;            acc3 <= fracz;
             sft0 <= 0;            sft1 <= sfti;             sft2 <= sfti-16;          sft3 <= sfti-32;
-         end else if(sfti>=32)begin
-            acc0 <= fracz;        acc1 <= fracz;            acc2 <= fracz;            acc3 <= {fracz,16'h0};
-            sft0 <= sfti+16;      sft1 <= sfti;             sft2 <= sfti-16;          sft3 <= sfti-16;
-         end else if(sfti>=16)begin
-            acc0 <= fracz;        acc1 <= fracz;            acc2 <= {fracz,16'h0};    acc3 <= 0;
-            sft0 <= sfti+16;      sft1 <= sfti;             sft2 <= sfti;             sft3 <= 0;
          end else begin
-            acc0 <= fracz;        acc1 <= {fracz,16'h0};    acc2 <= 0;                acc3 <= 0;
-            sft0 <= sfti+16;      sft1 <= sfti+16;          sft2 <= 0;                sft3 <= 0;
+            acc0 <= fracz;        acc1 <= fracz;            acc2 <= fracz;            acc3 <= 0;
+            sft0 <= sfti+16;      sft1 <= sfti;             sft2 <= sfti-16;          sft3 <= 0;
          end
       end
 

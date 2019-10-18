@@ -47,6 +47,66 @@ module fmad_check
 
 endmodule
 
+module alnsel
+  (
+   input logic [52:0]        fracz,
+   input logic signed [12:0] expd,
+   output logic [47:0]       acc0, acc1, acc2, acc3, acc4, acc5, acc6, acc7,
+   output logic [5:0]        sft0, sft1, sft2, sft3, sft4, sft5, sft6, sft7
+   );
+   always_comb begin
+      if(expd>=180)begin
+         acc0 = 0;                acc1 = 0;                acc2 = 0;                acc3 = 0;
+         sft0 = 0;                sft1 = 0;                sft2 = 0;                sft3 = 0;
+
+         acc4 = 0;                acc5 = 0;                acc6 = 0;                acc7 = 0;
+         sft4 = 0;                sft5 = 0;                sft6 = 0;                sft7 = 0;
+      end else if(expd>=148)begin
+         acc0 = 0;                acc1 = 0;                acc2 = 0;                acc3 = 0;
+         sft0 = 0;                sft1 = 0;                sft2 = 0;                sft3 = 0;
+
+         acc4 = 0;                acc5 = 0;                acc6 = fracz[52:48];     acc7 = fracz[52:32];
+         sft4 = 0;                sft5 = 0;                sft6 = expd-132;         sft7 = expd-132;
+      end else if(expd>=116)begin
+         acc0 = 0;                acc1 = 0;                acc2 = 0;                acc3 = 0;
+         sft0 = 0;                sft1 = 0;                sft2 = 0;                sft3 = 0;
+
+         acc4 = fracz[52:48];     acc5 = fracz[52:32];     acc6 = fracz[52:16];     acc7 = fracz;
+         sft4 = expd-100;         sft5 = expd-100;         sft6 = expd-100;         sft7 = expd-100;
+      end else if(expd>=84)begin
+         acc0 = 0;                acc1 = 0;                acc2 = fracz[52:48];     acc3 = fracz[52:32];
+         sft0 = 0;                sft1 = 0;                sft2 = expd-68;          sft3 = expd-68;
+
+         acc4 = fracz[52:16];     acc5 = fracz;            acc6 = fracz;            acc7 = fracz[31:0];
+         sft4 = expd-68;          sft5 = expd-68;          sft6 = expd-84;          sft7 = expd-100;
+      end else if(expd>=52)begin
+         acc0 = fracz[52:48];     acc1 = fracz[52:32];     acc2 = fracz[52:16];     acc3 = fracz;
+         sft0 = expd-36;          sft1 = expd-36;          sft2 = expd-36;          sft3 = expd-36;
+
+         acc4 = fracz;            acc5 = fracz[31:0];      acc6 = 0;                acc7 = 0;
+         sft4 = expd-52;          sft5 = expd-68;          sft6 = 0;                sft7 = 0;
+      end else if(expd>=20)begin
+         acc0 = fracz[52:16];     acc1 = fracz;            acc2 = fracz;            acc3 = fracz[31:0];
+         sft0 = expd-4;           sft1 = expd-4;           sft2 = expd-20;          sft3 = expd-36;
+
+         acc4 = 0;                acc5 = 0;                acc6 = 0;                acc7 = 0;
+         sft4 = 0;                sft5 = 0;                sft6 = 0;                sft7 = 0;
+      end else if(expd>=0)begin
+         acc0 = fracz;            acc1 = fracz[31:0];      acc2 = 0;                acc3 = 0;
+         sft0 = expd+12;          sft1 = expd-4;           sft2 = 0;                sft3 = 0;
+
+         acc4 = 0;                acc5 = 0;                acc6 = 0;                acc7 = 0;
+         sft4 = 0;                sft5 = 0;                sft6 = 0;                sft7 = 0;
+      end else begin
+         acc0 = fracz;            acc1 = 0;                acc2 = 0;                acc3 = 0;
+         sft0 = 12;               sft1 = 0;                sft3 = 0;                sft3 = 0;
+
+         acc4 = 0;                acc5 = 0;                acc6 = 0;                acc7 = 0;
+         sft4 = 0;                sft5 = 0;                sft6 = 0;                sft7 = 0;
+      end
+   end
+endmodule
+
 module fmad
   (
    input logic         clk,
@@ -153,37 +213,90 @@ module fmad
       .mulo(mulo01)
       );
 
+/////////
    logic [169:0]       align0i;
    logic [54:0]        aligng0i;
    
    always_comb begin
-      if(expd>53+117-64)begin
-         {align0i,aligng0i} = {'h0,fracz};
-      end else if(expd>-64)begin
-         {align0i,aligng0i} = {fracz,116'h0,55'h0} >> (expd+64);
+      if(expd+64>=55+116)begin
+         align0i = 'h0;
+      end else if(expd+64>=0)begin
+         align0i = {fracz,116'h0} >> (expd+64);
       end else begin
-         {align0i,aligng0i} = {fracz,116'h0,55'h0};
+         align0i = {fracz,116'h0};
+      end
+      if(expd+64>=55+116)begin
+         aligng0i = fracz;
+      end else if(expd+64>=116)begin
+         aligng0i = {fracz,55'h0} >> (expd+64-116);
+      end else begin
+         aligng0i = 55'h0;
       end
    end
 
+/////////
    logic [169:0]       align0;
    logic [2:0]         aligng0;
+
+   logic [47:0]        acc00, acc01, acc02, acc03, acc04, acc05, acc06, acc07;
+   logic [5:0]         sft00, sft01, sft02, sft03, sft04, sft05, sft06, sft07;
+
+   alnsel alnsel0
+     (
+      .fracz(fracz[52:0]),
+      .expd(expd+64),
+
+      .acc0(acc00), .acc1(acc01), .acc2(acc02), .acc3(acc03),
+      .acc4(acc04), .acc5(acc05), .acc6(acc06), .acc7(acc07),
+      .sft0(sft00), .sft1(sft01), .sft2(sft02), .sft3(sft03),
+      .sft4(sft04), .sft5(sft05), .sft6(sft06), .sft7(sft07)
+   );
+
    logic signed [12:0] expa0;
    logic               sgnz0;
    logic               sgnm0;
+
+   logic [47:0]        acc0, acc1, acc2, acc3, acc4, acc5, acc6, acc7;
+   logic [5:0]         sft0, sft1, sft2, sft3, sft4, sft5, sft6, sft7;
+   logic signed [12:0] expd0;
 
    always_ff @(posedge clk) begin
       if(en0)begin
          align0 <= align0i;
          aligng0 <= {aligng0i[54:53],(|aligng0i[52:0])};
-         if(expd>-64)begin
+         if(expd+64>0)begin
             expa0 <= expm+63;
+            expd0 <= expd+64+128;
          end else begin
             expa0 <= expz-1;
+            expd0 <= 128;
          end
          sgnz0 <= z[63];
          sgnm0 <= x[63]^y[63];
+
+         acc0 <= acc00;    acc1 <= acc01;    acc2 <= acc02;    acc3 <= acc03;
+         acc4 <= acc04;    acc5 <= acc05;    acc6 <= acc06;    acc7 <= acc07;
+         sft0 <= sft00;    sft1 <= sft01;    sft2 <= sft02;    sft3 <= sft03;
+         sft4 <= sft04;    sft5 <= sft05;    sft6 <= sft06;    sft7 <= sft07;
       end
+   end
+
+   logic [48:0]      aln00, aln01, aln02, aln03, aln04, aln05, aln06, aln07;
+
+///////
+   wire [169:0]      alignt = {align0[169:128],
+                               aln00[15:0], aln01[15:0], aln02[15:0], aln03[15:0],
+                               aln04[15:0], aln05[15:0], aln06[15:0], aln07[15:0]};
+
+   always_comb begin
+      aln00 = {acc0,16'h0}>>sft0;
+      aln01 = {acc1,16'h0}>>sft1;
+      aln02 = {acc2,16'h0}>>sft2;
+      aln03 = {acc3,16'h0}>>sft3;
+      aln04 = {acc4,16'h0}>>sft4;
+      aln05 = {acc5,16'h0}>>sft5;
+      aln06 = {acc6,16'h0}>>sft6;
+      aln07 = {acc7,16'h0}>>sft7;
    end
 
    logic [145:0]       add1;
@@ -199,11 +312,11 @@ module fmad
       .cin({sgnm0^sgnz0,1'b0}),
       .req_in_0(mul00),
       .req_in_1({mul01[36:0],27'h0}),
-      .req_in_2(align0[63:0]),
-      .aln0(32'h0),
-      .aln1(32'h0),
-      .aln2(32'h0),
-      .aln3(32'h0),
+      .req_in_2(64'h0),
+      .aln0(aln04[15:0]),
+      .aln1(aln05[15:0]),
+      .aln2(aln06[15:0]),
+      .aln3(aln07[15:0]),
       .addi(addi10),
       .addo(addo10)
       );
@@ -218,11 +331,11 @@ module fmad
       .cin(cout1),
       .req_in_0(64'h0),
       .req_in_1(mul01[53:37]),
-      .req_in_2(align0[143:64]),
-      .aln0(32'h0),
-      .aln1(32'h0),
-      .aln2(32'h0),
-      .aln3(32'h0),
+      .req_in_2(64'h0),
+      .aln0(aln00[15:0]),
+      .aln1(aln01[15:0]),
+      .aln2(aln02[15:0]),
+      .aln3(aln03[15:0]),
       .addi(addi11),
       .addo(addo11)
       );
@@ -251,12 +364,39 @@ module fmad
       .mulo(mulo11)
       );
 
+   logic [47:0]        acc10, acc11, acc12, acc13, acc14, acc15, acc16, acc17;
+   logic [5:0]         sft10, sft11, sft12, sft13, sft14, sft15, sft16, sft17;
+
+   alnsel alnsel1
+     (
+      .fracz(fracz[52:0]),
+      .expd(expd0),
+
+      .acc0(acc10), .acc1(acc11), .acc2(acc12), .acc3(acc13),
+      .acc4(acc14), .acc5(acc15), .acc6(acc16), .acc7(acc17),
+      .sft0(sft10), .sft1(sft11), .sft2(sft12), .sft3(sft13),
+      .sft4(sft14), .sft5(sft15), .sft6(sft16), .sft7(sft17)
+   );
+
+   logic [48:0]      aln10, aln11, aln12, aln13, aln14, aln15, aln16, aln17;
+
+   always_comb begin
+      aln10 = {acc10,16'h0}>>sft10;
+      aln11 = {acc11,16'h0}>>sft11;
+      aln12 = {acc12,16'h0}>>sft12;
+      aln13 = {acc13,16'h0}>>sft13;
+      aln14 = {acc14,16'h0}>>sft14;
+      aln15 = {acc15,16'h0}>>sft15;
+      aln16 = {acc16,16'h0}>>sft16;
+      aln17 = {acc17,16'h0}>>sft17;
+   end
+
    logic [12:0]        expr1;
    logic               sgnz1;
    logic               sgnm1;
    logic               alnm1;
    logic [2:0]         addg1;
-   logic [169:144]     align1;
+   logic [169:128]     align1;
 
    always_ff @(posedge clk) begin
       if(en1 & flag0[0])begin
@@ -265,7 +405,7 @@ module fmad
          expr1 <= expa0;
          alnm1 <= (expd<-1);
          addg1 <= aligng0;
-         align1 <= align0[169:144];
+         align1 <= {aln15[15:0], aln16[15:0], aln17[15:0]};
       end
    end
 
@@ -276,7 +416,7 @@ module fmad
          add2in0 = mul10;
          add2in1 = {mul11,27'h0};
          add2in2 = {{25{add1[145]}},add1[144:27]};
-         add2in3 = {align1,53'h0,64'h0};
+         add2in3 = {align1,53'h0,48'h0};
       end else begin
          add2in0 = {mul10,48'h0};
          add2in1 = {mul11,27'h0,48'h0};
