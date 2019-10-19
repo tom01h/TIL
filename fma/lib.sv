@@ -60,3 +60,29 @@ module add0
    end
 
 endmodule
+
+module alnsft0
+  (
+   input logic         clk,
+   input logic         en,
+   input logic [47:0]  acc0, acc1, acc2, acc3,
+   input logic [5:0]   sft0, sft1, sft2, sft3,
+   output logic [48:0] aln0, aln1, aln2, aln3
+   );
+
+   logic [47:0]        acc00, acc01, acc02, acc03;
+   logic [5:0]         sft00, sft01, sft02, sft03;
+
+   always_ff @(posedge clk) begin
+      if(en)begin
+         acc00 <= acc0;    acc01 <= acc1;    acc02 <= acc2;    acc03 <= acc3;
+         sft00 <= sft0;    sft01 <= sft1;    sft02 <= sft2;    sft03 <= sft3;
+      end
+   end
+   always_comb begin
+      aln0 = {acc00,16'h0}>>sft00;
+      aln1 = {acc01,16'h0}>>sft01;
+      aln2 = {acc02,16'h0}>>sft02;
+      aln3 = {acc03,16'h0}>>sft03;
+   end
+endmodule

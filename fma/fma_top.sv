@@ -26,6 +26,27 @@ typedef struct packed {
    logic [81:0]  out;
 } addot;
 
+typedef struct packed {
+   logic       en;
+   logic [47:0] acc0, acc1, acc2, acc3;
+   logic [5:0]  sft0, sft1, sft2, sft3;
+} sftit;
+
+typedef struct packed {
+   logic [48:0] aln0, aln1, aln2, aln3;
+} sftot;
+
+typedef struct packed {
+   logic       en;
+   logic [52:0] fracz;
+   logic signed [12:0] expd;
+} selit;
+
+typedef struct packed {
+   logic [47:0] acc0, acc1, acc2, acc3, acc4, acc5, acc6, acc7;
+   logic [5:0]  sft0, sft1, sft2, sft3, sft4, sft5, sft6, sft7;
+} selot;
+
 module fma
   (
    input logic         clk,
@@ -98,6 +119,74 @@ module fma
       .out(mulos1.out[53:0]),
       .req_in_1(mulis1.req_in_1[26:0]),
       .req_in_2(mulis1.req_in_2[26:0])
+   );
+
+   sftit sfti00,sfti01;
+   sftot sfto00,sfto01;
+   sftit sfti10,sfti11;
+   sftot sfto10,sfto11;
+   sftit sftis0,sftis1;
+   sftot sftos0,sftos1;
+   sftit sfti0;
+   sftot sfto0;
+
+   always_comb begin
+      if(sfti00.en)begin
+         sftis0 = sfti00;
+         sftis1 = sfti01;
+      end else if(sfti10.en)begin
+         sftis0 = sfti10;
+         sftis1 = sfti11;
+      end else begin
+         sftis0 = sfti0;
+         sftis1 = 0;
+         sftis1.en = 1'b0;
+      end
+      sfto00 = sftos0;
+      sfto01 = sftos1;
+      sfto10 = sftos0;
+      sfto11 = sftos1;
+      sfto0 = sftos0;
+   end
+
+   alnsft0 alnsft0
+     (
+      .clk(clk),    .en(sftis0.en),
+      .acc0(sftis0.acc0), .acc1(sftis0.acc1), .acc2(sftis0.acc2), .acc3(sftis0.acc3),
+      .sft0(sftis0.sft0), .sft1(sftis0.sft1), .sft2(sftis0.sft2), .sft3(sftis0.sft3),
+      .aln0(sftos0.aln0), .aln1(sftos0.aln1), .aln2(sftos0.aln2), .aln3(sftos0.aln3)
+      );
+
+   alnsft0 alnsft1
+     (
+      .clk(clk),    .en(sftis1.en),
+      .acc0(sftis1.acc0), .acc1(sftis1.acc1), .acc2(sftis1.acc2), .acc3(sftis1.acc3),
+      .sft0(sftis1.sft0), .sft1(sftis1.sft1), .sft2(sftis1.sft2), .sft3(sftis1.sft3),
+      .aln0(sftos1.aln0), .aln1(sftos1.aln1), .aln2(sftos1.aln2), .aln3(sftos1.aln3)
+      );
+
+   selit seli0, seli1;
+   selot selo0, selo1;
+   selit selis;
+   selot selos;
+
+   always_comb begin
+      if(seli0.en)begin
+         selis = seli0;
+      end else begin
+         selis = seli1;
+      end
+      selo0 = selos;
+      selo1 = selos;
+   end
+
+   alnseld0 alnseld0
+     (
+      .fracz(selis.fracz),      .expd(selis.expd),
+      .acc0(selos.acc0), .acc1(selos.acc1), .acc2(selos.acc2), .acc3(selos.acc3),
+      .acc4(selos.acc4), .acc5(selos.acc5), .acc6(selos.acc6), .acc7(selos.acc7),
+      .sft0(selos.sft0), .sft1(selos.sft1), .sft2(selos.sft2), .sft3(selos.sft3),
+      .sft4(selos.sft4), .sft5(selos.sft5), .sft6(selos.sft6), .sft7(selos.sft7)
    );
 
    addit addi10,addi11;
@@ -180,6 +269,18 @@ module fma
       .mulo10(mulo10),
       .muli11(muli11),
       .mulo11(mulo11),
+      .sfti00(sfti00),
+      .sfto00(sfto00),
+      .sfti01(sfti01),
+      .sfto01(sfto01),
+      .sfti10(sfti10),
+      .sfto10(sfto10),
+      .sfti11(sfti11),
+      .sfto11(sfto11),
+      .seli0(seli0),
+      .selo0(selo0),
+      .seli1(seli1),
+      .selo1(selo1),
       .addi10(addi10),
       .addo10(addo10),
       .addi11(addi11),
@@ -258,5 +359,66 @@ module add
    assign addi.aln3 = aln3;
    assign cout = addo.cout;
    assign out = addo.out;
+
+endmodule
+
+module alnsft
+  (
+   input logic         clk,
+   input logic         en,
+   input logic [47:0]  acc0, acc1, acc2, acc3,
+   input logic [5:0]   sft0, sft1, sft2, sft3,
+   output logic [48:0] aln0, aln1, aln2, aln3,
+   output              sftit sfti,
+   input               sftot sfto
+   );
+
+   assign sfti.en = en;
+   assign sfti.acc0 = acc0;
+   assign sfti.acc1 = acc1;
+   assign sfti.acc2 = acc2;
+   assign sfti.acc3 = acc3;
+   assign sfti.sft0 = sft0;
+   assign sfti.sft1 = sft1;
+   assign sfti.sft2 = sft2;
+   assign sfti.sft3 = sft3;
+   assign aln0 = sfto.aln0;
+   assign aln1 = sfto.aln1;
+   assign aln2 = sfto.aln2;
+   assign aln3 = sfto.aln3;
+
+endmodule
+
+module alnseld
+  (
+   input logic               en,
+   input logic [52:0]        fracz,
+   input logic signed [12:0] expd,
+   output logic [47:0]       acc0, acc1, acc2, acc3, acc4, acc5, acc6, acc7,
+   output logic [5:0]        sft0, sft1, sft2, sft3, sft4, sft5, sft6, sft7,
+   output                    selit seli,
+   input                     selot selo
+   );
+
+   assign seli.en = en;
+   assign seli.fracz = fracz;
+   assign seli.expd = expd;
+
+   assign acc0 = selo.acc0;
+   assign acc1 = selo.acc1;
+   assign acc2 = selo.acc2;
+   assign acc3 = selo.acc3;
+   assign acc4 = selo.acc4;
+   assign acc5 = selo.acc5;
+   assign acc6 = selo.acc6;
+   assign acc7 = selo.acc7;
+   assign sft0 = selo.sft0;
+   assign sft1 = selo.sft1;
+   assign sft2 = selo.sft2;
+   assign sft3 = selo.sft3;
+   assign sft4 = selo.sft4;
+   assign sft5 = selo.sft5;
+   assign sft6 = selo.sft6;
+   assign sft7 = selo.sft7;
 
 endmodule

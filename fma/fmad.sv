@@ -47,7 +47,7 @@ module fmad_check
 
 endmodule
 
-module alnsel
+module alnseld0
   (
    input logic [52:0]        fracz,
    input logic signed [12:0] expd,
@@ -122,6 +122,12 @@ module fmad
    input               mulot mulo00, mulo01,
    output              mulit muli10, muli11,
    input               mulot mulo10, mulo11,
+   output              sftit sfti00, sfti01,
+   input               sftot sfto00, sfto01,
+   output              sftit sfti10, sfti11,
+   input               sftot sfto10, sfto11,
+   output              selit seli0,  seli1,
+   input               selot selo0,  selo1,
    output              addit addi10, addi11,
    input               addot addo10, addo11,
    output              addit addi20, addi21,
@@ -193,24 +199,54 @@ module fmad
 
    mul mul00i
      (
-      .clk(clk),
-      .en(en0),
+      .clk(clk), .en(en0 & flag0i[0]),
       .out(mul00),
       .req_in_1(req_in_1[26:0]),
       .req_in_2(req_in_2[26:0]),
-      .muli(muli00),
-      .mulo(mulo00)
+      .muli(muli00), .mulo(mulo00)
       );
 
    mul mul01i
      (
-      .clk(clk),
-      .en(en0),
+      .clk(clk), .en(en0 & flag0i[0]),
       .out(mul01),
       .req_in_1(req_in_1[52:27]),
       .req_in_2(req_in_2[26:0]),
-      .muli(muli01),
-      .mulo(mulo01)
+      .muli(muli01), .mulo(mulo01)
+      );
+
+   logic [47:0]        acc00, acc01, acc02, acc03, acc04, acc05, acc06, acc07;
+   logic [5:0]         sft00, sft01, sft02, sft03, sft04, sft05, sft06, sft07;
+
+   alnseld alnsel0
+     (
+      .en(en0),
+      .fracz(fracz[52:0]),      .expd(expd+64),
+      .acc0(acc00), .acc1(acc01), .acc2(acc02), .acc3(acc03),
+      .acc4(acc04), .acc5(acc05), .acc6(acc06), .acc7(acc07),
+      .sft0(sft00), .sft1(sft01), .sft2(sft02), .sft3(sft03),
+      .sft4(sft04), .sft5(sft05), .sft6(sft06), .sft7(sft07),
+      .seli(seli0), .selo(selo0)
+   );
+
+   logic [48:0]      aln00, aln01, aln02, aln03, aln04, aln05, aln06, aln07;
+
+   alnsft alnsft00
+     (
+      .clk(clk),    .en(en0 & flag0i[0]),
+      .acc0(acc00), .acc1(acc01), .acc2(acc02), .acc3(acc03),
+      .sft0(sft00), .sft1(sft01), .sft2(sft02), .sft3(sft03),
+      .aln0(aln00), .aln1(aln01), .aln2(aln02), .aln3(aln03),
+      .sfti(sfti00),      .sfto(sfto00)
+      );
+
+   alnsft alnsft01
+     (
+      .clk(clk),    .en(en0 & flag0i[0]),
+      .acc0(acc04), .acc1(acc05), .acc2(acc06), .acc3(acc07),
+      .sft0(sft04), .sft1(sft05), .sft2(sft06), .sft3(sft07),
+      .aln0(aln04), .aln1(aln05), .aln2(aln06), .aln3(aln07),
+      .sfti(sfti01),      .sfto(sfto01)
       );
 
 /////////
@@ -234,34 +270,20 @@ module fmad
       end
    end
 
-/////////
    logic [169:0]       align0;
    logic [2:0]         aligng0;
 
-   logic [47:0]        acc00, acc01, acc02, acc03, acc04, acc05, acc06, acc07;
-   logic [5:0]         sft00, sft01, sft02, sft03, sft04, sft05, sft06, sft07;
-
-   alnsel alnsel0
-     (
-      .fracz(fracz[52:0]),
-      .expd(expd+64),
-
-      .acc0(acc00), .acc1(acc01), .acc2(acc02), .acc3(acc03),
-      .acc4(acc04), .acc5(acc05), .acc6(acc06), .acc7(acc07),
-      .sft0(sft00), .sft1(sft01), .sft2(sft02), .sft3(sft03),
-      .sft4(sft04), .sft5(sft05), .sft6(sft06), .sft7(sft07)
-   );
+   wire [169:0]        alignt = {align0[169:128],
+                                 aln00[15:0], aln01[15:0], aln02[15:0], aln03[15:0],
+                                 aln04[15:0], aln05[15:0], aln06[15:0], aln07[15:0]};
 
    logic signed [12:0] expa0;
    logic               sgnz0;
    logic               sgnm0;
-
-   logic [47:0]        acc0, acc1, acc2, acc3, acc4, acc5, acc6, acc7;
-   logic [5:0]         sft0, sft1, sft2, sft3, sft4, sft5, sft6, sft7;
    logic signed [12:0] expd0;
 
    always_ff @(posedge clk) begin
-      if(en0)begin
+      if(en0 & flag0i[0])begin
          align0 <= align0i;
          aligng0 <= {aligng0i[54:53],(|aligng0i[52:0])};
          if(expd+64>0)begin
@@ -273,30 +295,7 @@ module fmad
          end
          sgnz0 <= z[63];
          sgnm0 <= x[63]^y[63];
-
-         acc0 <= acc00;    acc1 <= acc01;    acc2 <= acc02;    acc3 <= acc03;
-         acc4 <= acc04;    acc5 <= acc05;    acc6 <= acc06;    acc7 <= acc07;
-         sft0 <= sft00;    sft1 <= sft01;    sft2 <= sft02;    sft3 <= sft03;
-         sft4 <= sft04;    sft5 <= sft05;    sft6 <= sft06;    sft7 <= sft07;
       end
-   end
-
-   logic [48:0]      aln00, aln01, aln02, aln03, aln04, aln05, aln06, aln07;
-
-///////
-   wire [169:0]      alignt = {align0[169:128],
-                               aln00[15:0], aln01[15:0], aln02[15:0], aln03[15:0],
-                               aln04[15:0], aln05[15:0], aln06[15:0], aln07[15:0]};
-
-   always_comb begin
-      aln00 = {acc0,16'h0}>>sft0;
-      aln01 = {acc1,16'h0}>>sft1;
-      aln02 = {acc2,16'h0}>>sft2;
-      aln03 = {acc3,16'h0}>>sft3;
-      aln04 = {acc4,16'h0}>>sft4;
-      aln05 = {acc5,16'h0}>>sft5;
-      aln06 = {acc6,16'h0}>>sft6;
-      aln07 = {acc7,16'h0}>>sft7;
    end
 
    logic [145:0]       add1;
@@ -304,99 +303,81 @@ module fmad
 
    add add10i
      (
-      .clk(clk),
-      .en(en1 & flag0[0]),
-      .cout(cout1),
-      .out(add1[63:0]),
-      .sub(sgnm0^sgnz0),
-      .cin({sgnm0^sgnz0,1'b0}),
-      .req_in_0(mul00),
-      .req_in_1({mul01[36:0],27'h0}),
-      .req_in_2(64'h0),
-      .aln0(aln04[15:0]),
-      .aln1(aln05[15:0]),
-      .aln2(aln06[15:0]),
-      .aln3(aln07[15:0]),
-      .addi(addi10),
-      .addo(addo10)
+      .clk(clk),          .en(en1 & flag0[0]),
+      .cout(cout1),       .out(add1[63:0]),
+      .sub(sgnm0^sgnz0),  .cin({sgnm0^sgnz0,1'b0}),
+      .req_in_0(mul00),   .req_in_1({mul01[36:0],27'h0}),         .req_in_2(64'h0),
+      .aln0(aln04[15:0]), .aln1(aln05[15:0]), .aln2(aln06[15:0]), .aln3(aln07[15:0]),
+      .addi(addi10),      .addo(addo10)
       );
 
    add add11i
      (
-      .clk(clk),
-      .en(en1 & flag0[0]),
-      .cout(),
-      .out(add1[145:64]),
-      .sub(sgnm0^sgnz0),
-      .cin(cout1),
-      .req_in_0(64'h0),
-      .req_in_1(mul01[53:37]),
-      .req_in_2(64'h0),
-      .aln0(aln00[15:0]),
-      .aln1(aln01[15:0]),
-      .aln2(aln02[15:0]),
-      .aln3(aln03[15:0]),
-      .addi(addi11),
-      .addo(addo11)
+      .clk(clk),          .en(en1 & flag0[0]),
+      .cout(),            .out(add1[145:64]),
+      .sub(sgnm0^sgnz0),  .cin(cout1),
+      .req_in_0(64'h0),   .req_in_1(mul01[53:37]),                .req_in_2(64'h0),
+      .aln0(aln00[15:0]), .aln1(aln01[15:0]), .aln2(aln02[15:0]), .aln3(aln03[15:0]),
+      .addi(addi11),      .addo(addo11)
       );
 
    logic [53:0]        mul10,mul11;
 
    mul mul10i
      (
-      .clk(clk),
-      .en(en1 & flag0[0]),
+      .clk(clk),          .en(en1 & flag0[0]),
       .out(mul10),
-      .req_in_1(req_in_1[26:0]),
-      .req_in_2(req_in_2[52:27]),
-      .muli(muli10),
-      .mulo(mulo10)
+      .req_in_1(req_in_1[26:0]), .req_in_2(req_in_2[52:27]),
+      .muli(muli10),      .mulo(mulo10)
       );
 
    mul mul11i
      (
-      .clk(clk),
-      .en(en1 & flag0[0]),
+      .clk(clk),          .en(en1 & flag0[0]),
       .out(mul11),
-      .req_in_1(req_in_1[52:27]),
-      .req_in_2(req_in_2[52:27]),
-      .muli(muli11),
-      .mulo(mulo11)
+      .req_in_1(req_in_1[52:27]), .req_in_2(req_in_2[52:27]),
+      .muli(muli11),      .mulo(mulo11)
       );
 
    logic [47:0]        acc10, acc11, acc12, acc13, acc14, acc15, acc16, acc17;
    logic [5:0]         sft10, sft11, sft12, sft13, sft14, sft15, sft16, sft17;
 
-   alnsel alnsel1
+   alnseld alnsel1
      (
-      .fracz(fracz[52:0]),
-      .expd(expd0),
-
+      .en(en1),
+      .fracz(fracz[52:0]),      .expd(expd0),
       .acc0(acc10), .acc1(acc11), .acc2(acc12), .acc3(acc13),
       .acc4(acc14), .acc5(acc15), .acc6(acc16), .acc7(acc17),
       .sft0(sft10), .sft1(sft11), .sft2(sft12), .sft3(sft13),
-      .sft4(sft14), .sft5(sft15), .sft6(sft16), .sft7(sft17)
+      .sft4(sft14), .sft5(sft15), .sft6(sft16), .sft7(sft17),
+      .seli(seli1), .selo(selo1)
    );
 
-   logic [48:0]      aln10, aln11, aln12, aln13, aln14, aln15, aln16, aln17;
+   logic [48:0]        aln10, aln11, aln12, aln13, aln14, aln15, aln16, aln17;
 
-   always_comb begin
-      aln10 = {acc10,16'h0}>>sft10;
-      aln11 = {acc11,16'h0}>>sft11;
-      aln12 = {acc12,16'h0}>>sft12;
-      aln13 = {acc13,16'h0}>>sft13;
-      aln14 = {acc14,16'h0}>>sft14;
-      aln15 = {acc15,16'h0}>>sft15;
-      aln16 = {acc16,16'h0}>>sft16;
-      aln17 = {acc17,16'h0}>>sft17;
-   end
+   alnsft alnsft10
+     (
+      .clk(clk),    .en(en1 & flag0[0]),
+      .acc0(acc10), .acc1(acc11), .acc2(acc12), .acc3(acc13),
+      .sft0(sft10), .sft1(sft11), .sft2(sft12), .sft3(sft13),
+      .aln0(aln10), .aln1(aln11), .aln2(aln12), .aln3(aln13),
+      .sfti(sfti10),      .sfto(sfto10)
+      );
+
+   alnsft alnsft11
+     (
+      .clk(clk),    .en(en1 & flag0[0]),
+      .acc0(acc14), .acc1(acc15), .acc2(acc16), .acc3(acc17),
+      .sft0(sft14), .sft1(sft15), .sft2(sft16), .sft3(sft17),
+      .aln0(aln14), .aln1(aln15), .aln2(aln16), .aln3(aln17),
+      .sfti(sfti11),      .sfto(sfto11)
+      );
 
    logic [12:0]        expr1;
    logic               sgnz1;
    logic               sgnm1;
    logic               alnm1;
    logic [2:0]         addg1;
-   logic [169:128]     align1;
 
    always_ff @(posedge clk) begin
       if(en1 & flag0[0])begin
@@ -405,11 +386,11 @@ module fmad
          expr1 <= expa0;
          alnm1 <= (expd<-1);
          addg1 <= aligng0;
-         align1 <= {aln15[15:0], aln16[15:0], aln17[15:0]};
       end
    end
 
    logic [143:0]       add2in0, add2in1, add2in2, add2in3;
+   wire [169:128]      align1 = {aln15[15:0], aln16[15:0], aln17[15:0]};
 
    always_comb  begin
       if(alnm1)begin
@@ -430,40 +411,22 @@ module fmad
 
    add add20i
      (
-      .clk(clk),
-      .en(en2 & flag1[0]),
-      .cout(cout2),
-      .out(add2h[63+27:27]),
-      .sub(sgnz1^sgnm1),
-      .cin({sgnm1^sgnz1,1'b0}),
-      .req_in_0(add2in0[63:0]),
-      .req_in_1(add2in1[63:0]),
-      .req_in_2(add2in2[63:0]),
-      .aln0(add2in3[63:48]),
-      .aln1(add2in3[47:32]),
-      .aln2(add2in3[31:16]),
-      .aln3(add2in3[15: 0]),
-      .addi(addi20),
-      .addo(addo20)
+      .clk(clk),          .en(en2 & flag1[0]),
+      .cout(cout2),       .out(add2h[63+27:27]),
+      .sub(sgnz1^sgnm1),  .cin({sgnm1^sgnz1,1'b0}),
+      .req_in_0(add2in0[63:0]),      .req_in_1(add2in1[63:0]),      .req_in_2(add2in2[63:0]),
+      .aln0(add2in3[63:48]), .aln1(add2in3[47:32]), .aln2(add2in3[31:16]), .aln3(add2in3[15: 0]),
+      .addi(addi20),      .addo(addo20)
       );
 
    add add21i
      (
-      .clk(clk),
-      .en(en2 & flag1[0]),
-      .cout(),
-      .out(add2h[169:64+27]),
-      .sub(sgnz1^sgnm1),
-      .cin(cout2),
-      .req_in_0(add2in0[143:64]),
-      .req_in_1(add2in1[143:64]),
-      .req_in_2(add2in2[143:64]),
-      .aln0(add2in3[143:112]),
-      .aln1(add2in3[111: 96]),
-      .aln2(add2in3[ 95: 80]),
-      .aln3(add2in3[ 79: 64]),
-      .addi(addi21),
-      .addo(addo21)
+      .clk(clk),          .en(en2 & flag1[0]),
+      .cout(),            .out(add2h[169:64+27]),
+      .sub(sgnz1^sgnm1),  .cin(cout2),
+      .req_in_0(add2in0[143:64]),    .req_in_1(add2in1[143:64]),    .req_in_2(add2in2[143:64]),
+      .aln0(add2in3[143:112]), .aln1(add2in3[111: 96]), .aln2(add2in3[ 95: 80]), .aln3(add2in3[ 79: 64]),
+      .addi(addi21),      .addo(addo21)
       );
 
    logic [12:0]        expr2;
