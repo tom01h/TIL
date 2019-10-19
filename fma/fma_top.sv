@@ -304,6 +304,8 @@ module fma
       .flag(flags[4:0]),
       .muli0(muli0),
       .mulo0(mulo0),
+      .sfti0(sfti0),
+      .sfto0(sfto0),
       .addi1(addi1),
       .addo1(addo1)
       );

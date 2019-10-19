@@ -60,9 +60,10 @@ module fmas
    output logic [4:0]  flag,
    output              mulit muli0,
    input               mulot mulo0,
+   output              sftit sfti0,
+   input               sftot sfto0,
    output              addit addi1,
    input               addot addo1
-
    );
 
    logic               en0, en1;
@@ -135,6 +136,8 @@ module fmas
    );
 
    logic [5:0]       sfti;
+   logic [47:0]      acc0, acc1, acc2, acc3;
+   logic [5:0]       sft0, sft1, sft2, sft3;
 
    always_comb begin
       if(expd>=55)begin
@@ -146,10 +149,26 @@ module fmas
       end else begin
          sfti = 0;
       end
+
+      if(sfti>=32)begin
+         acc0 = 0;            acc1 = fracz;        acc2 = fracz;        acc3 = fracz;
+         sft0 = 0;            sft1 = sfti;         sft2 = sfti-16;      sft3 = sfti-32;
+      end else begin
+         acc0 = fracz;        acc1 = fracz;        acc2 = fracz;        acc3 = 0;
+         sft0 = sfti+16;      sft1 = sfti;         sft2 = sfti-16;      sft3 = 0;
+      end
    end
 
-   logic [47:0]      acc0, acc1, acc2, acc3;
-   logic [5:0]       sft0, sft1, sft2, sft3;
+   logic [48:0]      aln0, aln1, aln2, aln3;
+
+   alnsft alnsft0
+     (
+      .clk(clk),   .en(en0 & flag0i[0]),
+      .acc0(acc0), .acc1(acc1), .acc2(acc2), .acc3(acc3),
+      .sft0(sft0), .sft1(sft1), .sft2(sft2), .sft3(sft3),
+      .aln0(aln0), .aln1(aln1), .aln2(aln2), .aln3(aln3),
+      .sfti(sfti0),      .sfto(sfto0)
+      );
 
    logic [8:0]       expa0;
    logic             sgnz0;
@@ -174,26 +193,12 @@ module fmas
          end else begin
             alnm0 <= 1'b1;
          end
-
-         if(sfti>=32)begin
-            acc0 <= 0;            acc1 <= fracz;            acc2 <= fracz;            acc3 <= fracz;
-            sft0 <= 0;            sft1 <= sfti;             sft2 <= sfti-16;          sft3 <= sfti-32;
-         end else begin
-            acc0 <= fracz;        acc1 <= fracz;            acc2 <= fracz;            acc3 <= 0;
-            sft0 <= sfti+16;      sft1 <= sfti;             sft2 <= sfti-16;          sft3 <= 0;
-         end
       end
-
    end
 
-   logic [48:0]      aln0, aln1, aln2, aln3;
    logic [79:0]      alnmul;
 
    always_comb begin
-      aln0 = {acc0,16'h0}>>sft0;
-      aln1 = {acc1,16'h0}>>sft1;
-      aln2 = {acc2,16'h0}>>sft2;
-      aln3 = {acc3,16'h0}>>sft3;
       if(alnm0)begin
          alnmul = {32'h0,mul[47:0]};
       end else begin

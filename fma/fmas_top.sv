@@ -26,6 +26,16 @@ typedef struct packed {
    logic [81:0] addo;
 } addot;
 
+typedef struct packed {
+   logic       en;
+   logic [47:0] acc0, acc1, acc2, acc3;
+   logic [5:0]  sft0, sft1, sft2, sft3;
+} sftit;
+
+typedef struct packed {
+   logic [48:0] aln0, aln1, aln2, aln3;
+} sftot;
+
 module fma
   (
    input logic         clk,
@@ -120,5 +130,26 @@ module add
       .aln2(aln2[31:0]),
       .aln3(aln3[31:0])
    );
+
+endmodule
+
+module alnsft
+  (
+   input logic         clk,
+   input logic         en,
+   input logic [47:0]  acc0, acc1, acc2, acc3,
+   input logic [5:0]   sft0, sft1, sft2, sft3,
+   output logic [48:0] aln0, aln1, aln2, aln3,
+   output              sftit sfti,
+   input               sftot sfto
+   );
+
+   alnsft0 alnsft0
+     (
+      .clk(clk),   .en(en),
+      .acc0(acc0), .acc1(acc1), .acc2(acc2), .acc3(acc3),
+      .sft0(sft0), .sft1(sft1), .sft2(sft2), .sft3(sft3),
+      .aln0(aln0), .aln1(aln1), .aln2(aln2), .aln3(aln3)
+      );
 
 endmodule
