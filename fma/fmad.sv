@@ -200,6 +200,7 @@ module fmad
    mul mul00i
      (
       .clk(clk), .en(en0 & flag0i[0]),
+      .req_command(req_command),
       .out(mul00),
       .req_in_1(req_in_1[26:0]),
       .req_in_2(req_in_2[26:0]),
@@ -209,6 +210,7 @@ module fmad
    mul mul01i
      (
       .clk(clk), .en(en0 & flag0i[0]),
+      .req_command(req_command),
       .out(mul01),
       .req_in_1(req_in_1[52:27]),
       .req_in_2(req_in_2[26:0]),
@@ -221,7 +223,7 @@ module fmad
    alnseld alnsel0
      (
       .en(en0),
-      .fracz(fracz[52:0]),      .expd(expd+64),
+      .fracz(fracz[52:0]),        .expd(expd+64),
       .acc0(acc00), .acc1(acc01), .acc2(acc02), .acc3(acc03),
       .acc4(acc04), .acc5(acc05), .acc6(acc06), .acc7(acc07),
       .sft0(sft00), .sft1(sft01), .sft2(sft02), .sft3(sft03),
@@ -233,18 +235,22 @@ module fmad
 
    alnsft alnsft00
      (
-      .clk(clk),    .en(en0 & flag0i[0]),
+      .clk(clk), .reset(reset),   .req_command(req_command),
+      .en0(en0 & flag0i[0]),      .en1(1'b0),
       .acc0(acc00), .acc1(acc01), .acc2(acc02), .acc3(acc03),
       .sft0(sft00), .sft1(sft01), .sft2(sft02), .sft3(sft03),
+      .acc0o(),     .acc1o(),     .acc2o(),     .acc3o(),
       .aln0(aln00), .aln1(aln01), .aln2(aln02), .aln3(aln03),
       .sfti(sfti00),      .sfto(sfto00)
       );
 
    alnsft alnsft01
      (
-      .clk(clk),    .en(en0 & flag0i[0]),
+      .clk(clk), .reset(reset),   .req_command(req_command),
+      .en0(en0 & flag0i[0]),      .en1(1'b0),
       .acc0(acc04), .acc1(acc05), .acc2(acc06), .acc3(acc07),
       .sft0(sft04), .sft1(sft05), .sft2(sft06), .sft3(sft07),
+      .acc0o(),     .acc1o(),     .acc2o(),     .acc3o(),
       .aln0(aln04), .aln1(aln05), .aln2(aln06), .aln3(aln07),
       .sfti(sfti01),      .sfto(sfto01)
       );
@@ -305,7 +311,8 @@ module fmad
      (
       .clk(clk),          .en(en1 & flag0[0]),
       .cout(cout1),       .out(add1[63:0]),
-      .sub(sgnm0^sgnz0),  .cin({sgnm0^sgnz0,1'b0}),
+      .out0(),            .out1(),            .out2(),            .out3(),
+      .sub({4{sgnm0^sgnz0}}),                 .cin({sgnm0^sgnz0,1'b0}),
       .req_in_0(mul00),   .req_in_1({mul01[36:0],27'h0}),         .req_in_2(64'h0),
       .aln0(aln04[15:0]), .aln1(aln05[15:0]), .aln2(aln06[15:0]), .aln3(aln07[15:0]),
       .addi(addi10),      .addo(addo10)
@@ -315,7 +322,8 @@ module fmad
      (
       .clk(clk),          .en(en1 & flag0[0]),
       .cout(),            .out(add1[145:64]),
-      .sub(sgnm0^sgnz0),  .cin(cout1),
+      .out0(),            .out1(),            .out2(),            .out3(),
+      .sub({4{sgnm0^sgnz0}}),                 .cin(cout1),
       .req_in_0(64'h0),   .req_in_1(mul01[53:37]),                .req_in_2(64'h0),
       .aln0(aln00[15:0]), .aln1(aln01[15:0]), .aln2(aln02[15:0]), .aln3(aln03[15:0]),
       .addi(addi11),      .addo(addo11)
@@ -326,6 +334,7 @@ module fmad
    mul mul10i
      (
       .clk(clk),          .en(en1 & flag0[0]),
+      .req_command(req_command),
       .out(mul10),
       .req_in_1(req_in_1[26:0]), .req_in_2(req_in_2[52:27]),
       .muli(muli10),      .mulo(mulo10)
@@ -334,6 +343,7 @@ module fmad
    mul mul11i
      (
       .clk(clk),          .en(en1 & flag0[0]),
+      .req_command(req_command),
       .out(mul11),
       .req_in_1(req_in_1[52:27]), .req_in_2(req_in_2[52:27]),
       .muli(muli11),      .mulo(mulo11)
@@ -345,7 +355,7 @@ module fmad
    alnseld alnsel1
      (
       .en(en1),
-      .fracz(fracz[52:0]),      .expd(expd0),
+      .fracz(fracz[52:0]),        .expd(expd0),
       .acc0(acc10), .acc1(acc11), .acc2(acc12), .acc3(acc13),
       .acc4(acc14), .acc5(acc15), .acc6(acc16), .acc7(acc17),
       .sft0(sft10), .sft1(sft11), .sft2(sft12), .sft3(sft13),
@@ -357,18 +367,22 @@ module fmad
 
    alnsft alnsft10
      (
-      .clk(clk),    .en(en1 & flag0[0]),
+      .clk(clk), .reset(reset),   .req_command(req_command),
+      .en0(en1 & flag0[0]),       .en1(1'b0),
       .acc0(acc10), .acc1(acc11), .acc2(acc12), .acc3(acc13),
       .sft0(sft10), .sft1(sft11), .sft2(sft12), .sft3(sft13),
+      .acc0o(),     .acc1o(),     .acc2o(),     .acc3o(),
       .aln0(aln10), .aln1(aln11), .aln2(aln12), .aln3(aln13),
       .sfti(sfti10),      .sfto(sfto10)
       );
 
    alnsft alnsft11
      (
-      .clk(clk),    .en(en1 & flag0[0]),
+      .clk(clk), .reset(reset),   .req_command(req_command),
+      .en0(en1 & flag0[0]),       .en1(1'b0),
       .acc0(acc14), .acc1(acc15), .acc2(acc16), .acc3(acc17),
       .sft0(sft14), .sft1(sft15), .sft2(sft16), .sft3(sft17),
+      .acc0o(),     .acc1o(),     .acc2o(),     .acc3o(),
       .aln0(aln14), .aln1(aln15), .aln2(aln16), .aln3(aln17),
       .sfti(sfti11),      .sfto(sfto11)
       );
@@ -413,9 +427,10 @@ module fmad
      (
       .clk(clk),          .en(en2 & flag1[0]),
       .cout(cout2),       .out(add2h[63+27:27]),
-      .sub(sgnz1^sgnm1),  .cin({sgnm1^sgnz1,1'b0}),
+      .out0(),            .out1(),                      .out2(),                 .out3(),
+      .sub({4{sgnz1^sgnm1}}),                           .cin({sgnm1^sgnz1,1'b0}),
       .req_in_0(add2in0[63:0]),      .req_in_1(add2in1[63:0]),      .req_in_2(add2in2[63:0]),
-      .aln0(add2in3[63:48]), .aln1(add2in3[47:32]), .aln2(add2in3[31:16]), .aln3(add2in3[15: 0]),
+      .aln0(add2in3[63:48]), .aln1(add2in3[47:32]),     .aln2(add2in3[31:16]),   .aln3(add2in3[15: 0]),
       .addi(addi20),      .addo(addo20)
       );
 
@@ -423,7 +438,8 @@ module fmad
      (
       .clk(clk),          .en(en2 & flag1[0]),
       .cout(),            .out(add2h[169:64+27]),
-      .sub(sgnz1^sgnm1),  .cin(cout2),
+      .out0(),            .out1(),                      .out2(),                 .out3(),
+      .sub({4{sgnz1^sgnm1}}),                           .cin(cout2),
       .req_in_0(add2in0[143:64]),    .req_in_1(add2in1[143:64]),    .req_in_2(add2in2[143:64]),
       .aln0(add2in3[143:112]), .aln1(add2in3[111: 96]), .aln2(add2in3[ 95: 80]), .aln3(add2in3[ 79: 64]),
       .addi(addi21),      .addo(addo21)

@@ -103,7 +103,7 @@ int main(int argc, char **argv, char **env) {
   tfp->open("tmp.vcd");
   main_time = 0;
 
-  verilator_top->req_command = 13;
+  verilator_top->req_command = 2;
 
   while (1) {
     if(scanf("%08x %08x %08x %08x %02x", &x0.i, &y0.i, &z0.i, &expect0.i, &flag0)==EOF){break;}

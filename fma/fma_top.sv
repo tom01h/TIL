@@ -1,16 +1,16 @@
 typedef struct packed {
    logic       en;
-   logic [26:0] req_in_1;
-   logic [26:0] req_in_2;
+   logic [31:0] req_in_1;
+   logic [31:0] req_in_2;
 } mulit;
 
 typedef struct packed {
-   logic [53:0] out;
+   logic [63:0] out;
 } mulot;
 
 typedef struct packed {
    logic       en;
-   logic       sub;
+   logic [3:0] sub;
    logic [1:0] cin;
    logic [79:0] req_in_0;
    logic [79:0] req_in_1;
@@ -24,15 +24,21 @@ typedef struct packed {
 typedef struct packed {
    logic [65:64] cout;
    logic [81:0]  out;
+   logic [31:0]  out0;
+   logic [31:0]  out1;
+   logic [31:0]  out2;
+   logic [31:0]  out3;
 } addot;
 
 typedef struct packed {
-   logic       en;
+   logic       en0;
+   logic [3:0] en1;
    logic [47:0] acc0, acc1, acc2, acc3;
    logic [5:0]  sft0, sft1, sft2, sft3;
 } sftit;
 
 typedef struct packed {
+   logic [47:0] acc0o, acc1o, acc2o, acc3o;
    logic [48:0] aln0, aln1, aln2, aln3;
 } sftot;
 
@@ -68,10 +74,10 @@ module fma
    always_comb begin
       if(req_command==0)begin
          rslt = rslts;
-         flag =flags;
+         flag = flags;
       end else begin
          rslt = rsltd;
-         flag =flagd;
+         flag = flagd;
       end
    end
 
@@ -106,20 +112,22 @@ module fma
    mul0 mul0
      (
       .clk(clk),
+      .req_command(req_command),
       .en(mulis0.en),
-      .out(mulos0.out[53:0]),
-      .req_in_1(mulis0.req_in_1[26:0]),
-      .req_in_2(mulis0.req_in_2[26:0])
-   );
+      .out(mulos0.out[63:0]),
+      .req_in_1(mulis0.req_in_1[31:0]),
+      .req_in_2(mulis0.req_in_2[31:0])
+      );
 
    mul0 mul1
      (
       .clk(clk),
+      .req_command(req_command),
       .en(mulis1.en),
-      .out(mulos1.out[53:0]),
-      .req_in_1(mulis1.req_in_1[26:0]),
-      .req_in_2(mulis1.req_in_2[26:0])
-   );
+      .out(mulos1.out[63:0]),
+      .req_in_1(mulis1.req_in_1[31:0]),
+      .req_in_2(mulis1.req_in_2[31:0])
+      );
 
    sftit sfti00,sfti01;
    sftot sfto00,sfto01;
@@ -131,16 +139,17 @@ module fma
    sftot sfto0;
 
    always_comb begin
-      if(sfti00.en)begin
+      if(sfti00.en0)begin
          sftis0 = sfti00;
          sftis1 = sfti01;
-      end else if(sfti10.en)begin
+      end else if(sfti10.en0)begin
          sftis0 = sfti10;
          sftis1 = sfti11;
       end else begin
          sftis0 = sfti0;
          sftis1 = 0;
-         sftis1.en = 1'b0;
+         sftis1.en0 = 1'b0;
+         sftis1.en1 = 4'h0;
       end
       sfto00 = sftos0;
       sfto01 = sftos1;
@@ -151,18 +160,22 @@ module fma
 
    alnsft0 alnsft0
      (
-      .clk(clk),    .en(sftis0.en),
-      .acc0(sftis0.acc0), .acc1(sftis0.acc1), .acc2(sftis0.acc2), .acc3(sftis0.acc3),
-      .sft0(sftis0.sft0), .sft1(sftis0.sft1), .sft2(sftis0.sft2), .sft3(sftis0.sft3),
-      .aln0(sftos0.aln0), .aln1(sftos0.aln1), .aln2(sftos0.aln2), .aln3(sftos0.aln3)
+      .clk(clk),           .reset(reset),       .req_command(req_command),
+      .en0(sftis0.en0),    .en1(sftis0.en1),
+      .acc0(sftis0.acc0),  .acc1(sftis0.acc1),  .acc2(sftis0.acc2),  .acc3(sftis0.acc3),
+      .sft0(sftis0.sft0),  .sft1(sftis0.sft1),  .sft2(sftis0.sft2),  .sft3(sftis0.sft3),
+      .acc0o(sftos0.acc0o),.acc1o(sftos0.acc1o),.acc2o(sftos0.acc2o),.acc3o(sftos0.acc3o),
+      .aln0(sftos0.aln0),  .aln1(sftos0.aln1),  .aln2(sftos0.aln2),  .aln3(sftos0.aln3)
       );
 
    alnsft0 alnsft1
      (
-      .clk(clk),    .en(sftis1.en),
-      .acc0(sftis1.acc0), .acc1(sftis1.acc1), .acc2(sftis1.acc2), .acc3(sftis1.acc3),
-      .sft0(sftis1.sft0), .sft1(sftis1.sft1), .sft2(sftis1.sft2), .sft3(sftis1.sft3),
-      .aln0(sftos1.aln0), .aln1(sftos1.aln1), .aln2(sftos1.aln2), .aln3(sftos1.aln3)
+      .clk(clk),           .reset(reset),       .req_command(req_command),
+      .en0(sftis1.en0),    .en1(sftis1.en1),
+      .acc0(sftis1.acc0),  .acc1(sftis1.acc1),  .acc2(sftis1.acc2),  .acc3(sftis1.acc3),
+      .sft0(sftis1.sft0),  .sft1(sftis1.sft1),  .sft2(sftis1.sft2),  .sft3(sftis1.sft3),
+      .acc0o(sftos0.acc0o),.acc1o(sftos0.acc1o),.acc2o(sftos0.acc2o),.acc3o(sftos0.acc3o),
+      .aln0(sftos1.aln0),  .aln1(sftos1.aln1),  .aln2(sftos1.aln2),  .aln3(sftos1.aln3)
       );
 
    selit seli0, seli1;
@@ -222,7 +235,11 @@ module fma
       .en(addis0.en),
       .cout(addos0.cout[65:64]),
       .out(addos0.out[81:0]),
-      .sub(addis0.sub),
+      .out0(addos0.out0[31:0]),
+      .out1(addos0.out1[31:0]),
+      .out2(addos0.out2[31:0]),
+      .out3(addos0.out3[31:0]),
+      .sub(addis0.sub[3:0]),
       .cin(addis0.cin[1:0]),
       .req_in_0(addis0.req_in_0[79:0]),
       .req_in_1(addis0.req_in_1[79:0]),
@@ -239,7 +256,11 @@ module fma
       .en(addis1.en),
       .cout(addos1.cout[65:64]),
       .out(addos1.out[81:0]),
-      .sub(addis1.sub),
+      .out0(addos1.out0[31:0]),
+      .out1(addos1.out1[31:0]),
+      .out2(addos1.out2[31:0]),
+      .out3(addos1.out3[31:0]),
+      .sub(addis1.sub[3:0]),
       .cin(addis1.cin[1:0]),
       .req_in_0(addis1.req_in_0[79:0]),
       .req_in_1(addis1.req_in_1[79:0]),
@@ -315,10 +336,11 @@ endmodule
 module mul
   (
    input logic         clk,
+   input integer       req_command,
    input logic         en,
-   output logic [79:0] out,
-   input logic [52:0]  req_in_1,
-   input logic [26:0]  req_in_2,
+   output logic [63:0] out,
+   input logic [31:0]  req_in_1,
+   input logic [31:0]  req_in_2,
    output              mulit muli,
    input               mulot mulo
    );
@@ -336,7 +358,11 @@ module add
    input logic          en,
    output logic [65:64] cout,
    output logic [81:0]  out,
-   input logic          sub,
+   output logic [31:0]  out0,
+   output logic [31:0]  out1,
+   output logic [31:0]  out2,
+   output logic [31:0]  out3,
+   input logic [3:0]    sub,
    input logic [1:0]    cin,
    input logic [79:0]   req_in_0,
    input logic [79:0]   req_in_1,
@@ -361,21 +387,30 @@ module add
    assign addi.aln3 = aln3;
    assign cout = addo.cout;
    assign out = addo.out;
+   assign out0 = addo.out0;
+   assign out1 = addo.out1;
+   assign out2 = addo.out2;
+   assign out3 = addo.out3;
 
 endmodule
 
 module alnsft
   (
    input logic         clk,
-   input logic         en,
+   input logic         reset,
+   input integer       req_command,
+   input logic         en0,
+   input logic [3:0]   en1,
    input logic [47:0]  acc0, acc1, acc2, acc3,
    input logic [5:0]   sft0, sft1, sft2, sft3,
    output logic [48:0] aln0, aln1, aln2, aln3,
+   output logic [47:0] acc0o,acc1o,acc2o,acc3o,
    output              sftit sfti,
    input               sftot sfto
    );
 
-   assign sfti.en = en;
+   assign sfti.en0 = en0;
+   assign sfti.en1 = en1;
    assign sfti.acc0 = acc0;
    assign sfti.acc1 = acc1;
    assign sfti.acc2 = acc2;
@@ -388,6 +423,10 @@ module alnsft
    assign aln1 = sfto.aln1;
    assign aln2 = sfto.aln2;
    assign aln3 = sfto.aln3;
+   assign acc0o= sfto.acc0o;
+   assign acc1o= sfto.acc1o;
+   assign acc2o= sfto.acc2o;
+   assign acc3o= sfto.acc3o;
 
 endmodule
 

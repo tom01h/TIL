@@ -126,6 +126,7 @@ module fmas
    mul mul0i
      (
       .clk(clk),
+      .req_command(req_command),
       .en(en0 & flag0i[0]),
       .req_in_1(req_in_1),
       .req_in_2(req_in_2),
@@ -163,9 +164,11 @@ module fmas
 
    alnsft alnsft0
      (
-      .clk(clk),   .en(en0 & flag0i[0]),
+      .clk(clk), .reset(reset), .req_command(req_command),
+      .en0(en0 & flag0i[0]),    .en1(1'b0),
       .acc0(acc0), .acc1(acc1), .acc2(acc2), .acc3(acc3),
       .sft0(sft0), .sft1(sft1), .sft2(sft2), .sft3(sft3),
+      .acc0o(),    .acc1o(),    .acc2o(),    .acc3o(),
       .aln0(aln0), .aln1(aln1), .aln2(aln2), .aln3(aln3),
       .sfti(sfti0),      .sfto(sfto0)
       );
@@ -213,7 +216,8 @@ module fmas
       .clk(clk),
       .en(en1 & flag0[0]),
       .cout(),
-      .sub(sgnm0^sgnz0),
+      .out0(),          .out1(),          .out2(),          .out3(),
+      .sub({4{sgnm0^sgnz0}}),
       .cin({sgnm0^sgnz0,1'b0}),
       .req_in_0(alnmul),
       .req_in_1('h0),
