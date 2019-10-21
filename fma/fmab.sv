@@ -1,15 +1,21 @@
 module fmab
   (
-   input               clk,
-   input               reset,
-   input               req,
+   input logic         clk,
+   input logic         reset,
+   input logic         req,
    input integer       req_command,
-   input [31:0]        x,
-   input [31:0]        y,
-   input [31:0]        z,
-   input [31:0]        w,
+   input logic [31:0]  x,
+   input logic [31:0]  y,
+   input logic [31:0]  z,
+   input logic [31:0]  w,
    output logic [31:0] acc0, acc1, acc2, acc3,
-   output logic [ 9:0] exp0, exp1, exp2, exp3
+   output logic [ 9:0] exp0, exp1, exp2, exp3,
+   output              mulit muli0,
+   input               mulot mulo0,
+   output              sftit sfti0,
+   input               sftot sfto0,
+   output              addit addi1,
+   input               addot addo1
    );
 
    logic               en0, en1;
@@ -33,16 +39,16 @@ module fmab
    wire [31:0]         req_in_1 = {1'b1,x[6:0],  1'b1,y[6:0],  1'b1,z[6:0],  1'b1,w[6:0]};
    wire [31:0]         req_in_2 = {1'b1,x[22:16],1'b1,y[22:16],1'b1,z[22:16],1'b1,w[22:16]};
 
-   mul0 mul0i
+   mul mul0i
      (
       .clk(clk),
       .req_command(req_command),
       .en(en0),
       .req_in_1(req_in_1),
       .req_in_2(req_in_2),
-      .out(mul)//,
-//      .muli(muli0),
-//      .mulo(mulo0)
+      .out(mul),
+      .muli(muli0),
+      .mulo(mulo0)
       );
 
    logic signed [9:0]  exp0l, exp1l, exp2l, exp3l;
@@ -74,7 +80,7 @@ module fmab
    wire [5:0]        sft2 = (exd2[9:6]!=0) ? 63 : exd2;
    wire [5:0]        sft3 = (exd3[9:6]!=0) ? 63 : exd3;
 
-   alnsft0 alnsft0i
+   alnsft alnsft0i
      (
       .clk(clk),
       .reset(reset),
@@ -87,7 +93,8 @@ module fmab
       .acc3({{16{add3[31]}},add3}),
       .sft0(sft0),  .sft1(sft1),  .sft2(sft2),  .sft3(sft3),
       .acc0o(acc0), .acc1o(acc1), .acc2o(acc2), .acc3o(acc3),
-      .aln0(aln0),  .aln1(aln1),  .aln2(aln2),  .aln3(aln3)
+      .aln0(aln0),  .aln1(aln1),  .aln2(aln2),  .aln3(aln3),
+      .sfti(sfti0), .sfto(sfto0)
       );
 
    logic [3:0]       mulctl;
@@ -124,7 +131,7 @@ module fmab
       end
    end
 
-   add0 add0i
+   add add0i
      (
       .clk(clk),
       .en(1'b0),
@@ -142,7 +149,9 @@ module fmab
       .aln0(aln0),
       .aln1(aln1),
       .aln2(aln2),
-      .aln3(aln3)
+      .aln3(aln3),
+      .addi(addi1),
+      .addo(addo1)
    );
 
 endmodule

@@ -22,7 +22,7 @@ DESIGN_SRCS = \
 lib.sv \
 fmab.sv \
 
-TOP = 
+TOP = fmab_top.sv
 
 TB = fmab_tb.cpp
 

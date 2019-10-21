@@ -62,6 +62,9 @@ module fma
    input logic [63:0]  x,
    input logic [63:0]  y,
    input logic [63:0]  z,
+   input logic [31:0]  w,
+   output logic [31:0] acc0, acc1, acc2, acc3,
+   output logic [ 9:0] exp0, exp1, exp2, exp3,
    output logic [63:0] rslt,
    output logic [4:0]  flag
    );
@@ -89,6 +92,8 @@ module fma
    mulot mulos0,mulos1;
    mulit muli0;
    mulot mulo0;
+   mulit mulib0;
+   mulot mulob0;
 
    always_comb begin
       if(muli00.en)begin
@@ -97,8 +102,12 @@ module fma
       end else if(muli10.en)begin
          mulis0 = muli10;
          mulis1 = muli11;
-      end else begin
+      end else if(muli0.en)begin
          mulis0 = muli0;
+         mulis1 = 0;
+         mulis1.en = 1'b0;
+      end else begin
+         mulis0 = mulib0;
          mulis1 = 0;
          mulis1.en = 1'b0;
       end
@@ -107,6 +116,7 @@ module fma
       mulo10 = mulos0;
       mulo11 = mulos1;
       mulo0 = mulos0;
+      mulob0 = mulos0;
    end
 
    mul0 mul0
@@ -137,6 +147,8 @@ module fma
    sftot sftos0,sftos1;
    sftit sfti0;
    sftot sfto0;
+   sftit sftib0;
+   sftot sftob0;
 
    always_comb begin
       if(sfti00.en0)begin
@@ -145,8 +157,13 @@ module fma
       end else if(sfti10.en0)begin
          sftis0 = sfti10;
          sftis1 = sfti11;
-      end else begin
+      end else if(sfti0.en0)begin
          sftis0 = sfti0;
+         sftis1 = 0;
+         sftis1.en0 = 1'b0;
+         sftis1.en1 = 4'h0;
+      end else begin
+         sftis0 = sftib0;
          sftis1 = 0;
          sftis1.en0 = 1'b0;
          sftis1.en1 = 4'h0;
@@ -156,6 +173,7 @@ module fma
       sfto10 = sftos0;
       sfto11 = sftos1;
       sfto0 = sftos0;
+      sftob0 = sftos0;
    end
 
    alnsft0 alnsft0
@@ -210,6 +228,8 @@ module fma
    addot addos0,addos1;
    addit addi1;
    addot addo1;
+   addit addib1;
+   addot addob1;
 
    always_comb begin
       if(addi10.en)begin
@@ -218,8 +238,11 @@ module fma
       end else if(addi20.en)begin
          addis0 = addi20;
          addis1 = addi21;
-      end else begin
+      end else if(addi1.en)begin
          addis0 = addi1;
+         addis1 = 0;
+      end else begin
+         addis0 = addib1;
          addis1 = 0;
       end
       addo10 = addos0;
@@ -227,6 +250,7 @@ module fma
       addo20 = addos0;
       addo21 = addos1;
       addo1 = addos0;
+      addob1 = addos0;
    end
 
    add0 add0
@@ -329,6 +353,32 @@ module fma
       .sfto0(sfto0),
       .addi1(addi1),
       .addo1(addo1)
+      );
+
+   fmab fmab
+     (
+      .clk(clk),
+      .reset(reset),
+      .req(req&(req_command==2)),
+      .req_command(req_command),
+      .x(x[31:0]),
+      .y(y[31:0]),
+      .z(z[31:0]),
+      .w(w[31:0]),
+      .acc0(acc0[31:0]),
+      .acc1(acc1[31:0]),
+      .acc2(acc2[31:0]),
+      .acc3(acc3[31:0]),
+      .exp0(exp0[ 9:0]),
+      .exp1(exp1[ 9:0]),
+      .exp2(exp2[ 9:0]),
+      .exp3(exp3[ 9:0]),
+      .muli0(mulib0),
+      .mulo0(mulob0),
+      .sfti0(sftib0),
+      .sfto0(sftob0),
+      .addi1(addib1),
+      .addo1(addob1)
       );
 
 endmodule
