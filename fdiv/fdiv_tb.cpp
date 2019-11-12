@@ -82,10 +82,12 @@ int main(int argc, char **argv, char **env) {
       expect.f = (double)x.f / (double)y.f;
       flag = -1;
     }
-    if(((x.i&0x7f800000) == 0)  || ((y.i&0x7f800000) == 0)  || ((expect.i&0x7f800000) == 0)  ||
-       ((x.i|0x807fffff) == -1) || ((y.i|0x807fffff) == -1) || ((expect.i|0x807fffff) == -1) ||
-       (flag == 3) ){
-      printf("SKIPED %04d : %08x / %08x = %08x .. %02x\n",i,x.i,y.i,expect.i,flag&0xff);
+    if(((x.i&0x7f800000) == 0) && ((x.i&0x7fffffff) != 0)  || //subnormal input
+       ((y.i&0x7f800000) == 0) && ((y.i&0x7fffffff) != 0)  || //subnormal input
+       ((expect.i&0x7f800000) == 0) && ((expect.i&0x7fffffff) != 0)  || //subnormal output
+       ((expect.i&0x7fffffff) == 0x00800000) && (flag == 3) || //subnormal output
+       false){
+      printf("SKIPPED     : %08x / %08x = %08x .. %02x\n",x.i,y.i,expect.i,flag&0xff);
       continue;
     }
 
