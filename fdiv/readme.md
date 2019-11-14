@@ -2,7 +2,9 @@
 
 ヘネパタ Computer Architecture 第6版 のオンライン付録の  J Computer Arithmetic で説明されている除算器を FPU で実装したいと思います。
 
-1. J.9 の基数2の SRT 除算
+1. J.9 の基数2の SRT 除算  $TOPFILE=fdiv2.sv
+2. J.9 の基数4の SRT 除算  $TOPFILE=fdiv4.sv
+   - Exercises J.33 b. の ”テーブルが P に対して正負対称であることを利用してテーブルを小さくしろ” に対応済み
 
 #### 制限事項
 
@@ -22,7 +24,7 @@
 実行には Verilator と berkeley-testfloat が必要です。
 
 ```
-$ make TOP=fdiv2.sv
+$ make TOP={$TOPFILE}
 $ {$PATH_TO_berkeley-testfloat-3}/build/Linux-x86_64-GCC/testfloat_gen -f32_div | ./sim/Vfdiv > log
 ```
 
