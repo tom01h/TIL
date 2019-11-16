@@ -5,6 +5,10 @@
 1. J.9 の基数2の SRT 除算  $TOPFILE=fdiv2.sv
 2. J.9 の基数4の SRT 除算  $TOPFILE=fdiv4.sv
    - Exercises J.33 b. の ”テーブルが P に対して正負対称であることを利用してテーブルを小さくしろ” に対応済み
+3. Exercises の J.33 c. の CSA を使った基数4の SRT 除算  $TOPFILE=fdiv4s.sv
+   - sum と carry が異符号の場合を考えると、剰余の範囲は p-1～p+2 になってしまった。
+   - p=(sumとcarryが同符号) ? ps[上位]+pc[上位] :  ps[上位]+pc[上位]+1 ; とすると p～p+2 になる?
+   - 最後に剰余が負にならないように調整する部分が全ビットの和で判定しないといけないのが残念。
 
 #### 制限事項
 
@@ -28,3 +32,11 @@ $ make TOP={$TOPFILE}
 $ {$PATH_TO_berkeley-testfloat-3}/build/Linux-x86_64-GCC/testfloat_gen -f32_div | ./sim/Vfdiv > log
 ```
 
+#### テーブル作成
+
+table_cpa.c ← Exercises の J.33 a. 図J.34の結果を⽣成するプログラムを作成
+
+table_csa.c ← Exercises の J.33 c. 図J.34の CSA 版の結果を⽣成するプログラムを作成
+
+ Pのレンジの本当の端っこは途中の境界とは意味が違うような気がする。  
+どう違うかはプログラム参照。
