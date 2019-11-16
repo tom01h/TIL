@@ -199,8 +199,11 @@ module fdiv
               qi[1:0] = 2'b00;
            end else if(pp<=6'd5)begin
               qi[1:0] = 2'b01;
-           end else begin
+           end else if(pp<=6'd11)begin
               qi[1:0] = 2'b10;
+           end else begin
+              $display("ERR %d, %d",pp,b);
+              $finish;
            end
         end
         3'd1:begin
@@ -208,8 +211,11 @@ module fdiv
               qi[1:0] = 2'b00;
            end else if(pp<=6'd6)begin
               qi[1:0] = 2'b01;
-           end else begin
+           end else if(pp<=6'd13)begin
               qi[1:0] = 2'b10;
+           end else begin
+              $display("ERR %d, %d",pp,b);
+              $finish;
            end
         end
         3'd2:begin
@@ -217,8 +223,11 @@ module fdiv
               qi[1:0] = 2'b00;
            end else if(pp<=6'd7)begin
               qi[1:0] = 2'b01;
-           end else begin
+           end else if(pp<=6'd14)begin
               qi[1:0] = 2'b10;
+           end else begin
+              $display("ERR %d, %d",pp,b);
+              $finish;
            end
         end
         3'd3:begin
@@ -226,8 +235,11 @@ module fdiv
               qi[1:0] = 2'b00;
            end else if(pp<=6'd8)begin
               qi[1:0] = 2'b01;
-           end else begin
+           end else if(pp<=6'd15)begin
               qi[1:0] = 2'b10;
+           end else begin
+              $display("ERR %d, %d",pp,b);
+              $finish;
            end
         end
         3'd4:begin
@@ -235,8 +247,11 @@ module fdiv
               qi[1:0] = 2'b00;
            end else if(pp<=6'd9)begin
               qi[1:0] = 2'b01;
-           end else begin
+           end else if(pp<=6'd17)begin
               qi[1:0] = 2'b10;
+           end else begin
+              $display("ERR %d, %d",pp,b);
+              $finish;
            end
         end
         3'd5:begin
@@ -244,8 +259,11 @@ module fdiv
               qi[1:0] = 2'b00;
            end else if(pp<=6'd9)begin
               qi[1:0] = 2'b01;
-           end else begin
+           end else if(pp<=6'd18)begin
               qi[1:0] = 2'b10;
+           end else begin
+              $display("ERR %d, %d",pp,b);
+              $finish;
            end
         end
         3'd6:begin
@@ -253,8 +271,11 @@ module fdiv
               qi[1:0] = 2'b00;
            end else if(pp<=6'd10)begin
               qi[1:0] = 2'b01;
-           end else begin
+           end else if(pp<=6'd19)begin
               qi[1:0] = 2'b10;
+           end else begin
+              $display("ERR %d, %d",pp,b);
+              $finish;
            end
         end
         3'd7:begin
@@ -262,8 +283,11 @@ module fdiv
               qi[1:0] = 2'b00;
            end else if(pp<=6'd11)begin
               qi[1:0] = 2'b01;
-           end else begin
+           end else if(pp<=6'd21)begin
               qi[1:0] = 2'b10;
+           end else begin
+              $display("ERR %d, %d",pp,b);
+              $finish;
            end
         end
       endcase
