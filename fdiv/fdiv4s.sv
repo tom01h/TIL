@@ -88,32 +88,35 @@ module fdiv
    logic [26:0]      ps, pc;
    logic [27:0]      qp, qn;
 
-   wire [26:19]      pu = ps[26:19]+pc[26:19];
+   wire [26:20]      pup =   ps[26:20]+pc[26:20];
+   wire [26:20]      pun = ~(ps[26:20]+pc[26:20]+1);
+   wire [25:20]      pu  = ((pup[26]&pun[26]) ? 0 :
+                            (pup[26])         ? pun[25:20] : pup[25:20]);
 
    always_ff @(posedge clk)begin
       if(cnt==0)begin
          if(req==1'b1)begin
             ps <= {1'b0,fracx};
             pc <= 27'b0;
-            qp <= 26'h0;
-            qn <= 26'h0;
+            qp <= 28'h0;
+            qn <= 28'h0;
          end
       end else if(cnt==fin)begin
 //         if(pu[26]==1'b1)begin
          if((ps+pc)&27'h4000000)begin
             ps <= ps + pc + {fracy,2'b0};
             qp <= qp-qn-1;
-            qn <= 0;
+            qn <= 28'h0;
          end else begin
             ps <= ps + pc;
             qp <= qp-qn;
-            qn <= 0;
+            qn <= 28'h0;
          end
       end else begin
-         casez(qi(pu[26], {7{pu[26]}}^pu[25:19], fracy[23:20]))
+         casez(qi(pup[26], pu[25:20], fracy[23:20]))
            3'b000: begin
-              ps <= sum(  1'b1, {ps,2'b00}, {pc,2'b00}, ~26'b0);
-              pc <= carry(1'b1, {ps,2'b00}, {pc,2'b00}, ~26'b0);
+              ps <= sum(  1'b1, {ps,2'b00}, {pc,2'b00}, ~27'b0);
+              pc <= carry(1'b1, {ps,2'b00}, {pc,2'b00}, ~27'b0);
               qp <= {qp,2'b00};
               qn <= {qn,2'b00};
            end
@@ -130,8 +133,8 @@ module fdiv
               qn <= {qn,2'b00};
            end
            3'b100: begin
-              ps <= sum(  1'b0, {ps,2'b00}, {pc,2'b00}, 26'b0);
-              pc <= carry(1'b0, {ps,2'b00}, {pc,2'b00}, 26'b0);
+              ps <= sum(  1'b0, {ps,2'b00}, {pc,2'b00}, 27'b0);
+              pc <= carry(1'b0, {ps,2'b00}, {pc,2'b00}, 27'b0);
               qp <= {qp,2'b00};
               qn <= {qn,2'b00};
            end
@@ -215,19 +218,19 @@ module fdiv
    endfunction
 
    function [2:0] qi;
-      input logic ps;
-      input logic [6:0] pp;
+      input logic        s;
+      input logic [5:0] pp;
       input logic [3:0] b;
 
-      qi[2] = ps;
+      qi[2] = s;
 
       casez(b[2:0])
         3'd0:begin
-           if(pp<=7'd8)begin
+           if(pp<=3)begin
               qi[1:0] = 2'b00;
-           end else if(pp<=7'd24)begin
+           end else if(pp<=11)begin
               qi[1:0] = 2'b01;
-           end else if(pp<=7'd48)begin
+           end else if(pp<=23)begin
               qi[1:0] = 2'b10;
            end else begin
               $display("ERR %d, %d",pp,b);
@@ -235,11 +238,11 @@ module fdiv
            end
         end
         3'd1:begin
-           if(pp<=7'd10)begin
+           if(pp<=4)begin
               qi[1:0] = 2'b00;
-           end else if(pp<=7'd28)begin
+           end else if(pp<=13)begin
               qi[1:0] = 2'b01;
-           end else if(pp<=7'd54)begin
+           end else if(pp<=26)begin
               qi[1:0] = 2'b10;
            end else begin
               $display("ERR %d, %d",pp,b);
@@ -247,11 +250,11 @@ module fdiv
            end
         end
         3'd2:begin
-           if(pp<=7'd11)begin
+           if(pp<=4)begin
               qi[1:0] = 2'b00;
-           end else if(pp<=7'd31)begin
+           end else if(pp<=14)begin
               qi[1:0] = 2'b01;
-           end else if(pp<=7'd59)begin
+           end else if(pp<=29)begin
               qi[1:0] = 2'b10;
            end else begin
               $display("ERR %d, %d",pp,b);
@@ -259,11 +262,11 @@ module fdiv
            end
         end
         3'd3:begin
-           if(pp<=7'd12)begin
+           if(pp<=5)begin
               qi[1:0] = 2'b00;
-           end else if(pp<=7'd34)begin
+           end else if(pp<=16)begin
               qi[1:0] = 2'b01;
-           end else if(pp<=7'd64)begin
+           end else if(pp<=31)begin
               qi[1:0] = 2'b10;
            end else begin
               $display("ERR %d, %d",pp,b);
@@ -271,11 +274,11 @@ module fdiv
            end
         end
         3'd4:begin
-           if(pp<=7'd14)begin
+           if(pp<=6)begin
               qi[1:0] = 2'b00;
-           end else if(pp<=7'd38)begin
+           end else if(pp<=18)begin
               qi[1:0] = 2'b01;
-           end else if(pp<=7'd70)begin
+           end else if(pp<=34)begin
               qi[1:0] = 2'b10;
            end else begin
               $display("ERR %d, %d",pp,b);
@@ -283,11 +286,11 @@ module fdiv
            end
         end
         3'd5:begin
-           if(pp<=7'd15)begin
+           if(pp<=6)begin
               qi[1:0] = 2'b00;
-           end else if(pp<=7'd41)begin
+           end else if(pp<=19)begin
               qi[1:0] = 2'b01;
-           end else if(pp<=7'd75)begin
+           end else if(pp<=37)begin
               qi[1:0] = 2'b10;
            end else begin
               $display("ERR %d, %d",pp,b);
@@ -295,11 +298,11 @@ module fdiv
            end
         end
         3'd6:begin
-           if(pp<=7'd16)begin
+           if(pp<=7)begin
               qi[1:0] = 2'b00;
-           end else if(pp<=7'd44)begin
+           end else if(pp<=21)begin
               qi[1:0] = 2'b01;
-           end else if(pp<=7'd80)begin
+           end else if(pp<=39)begin
               qi[1:0] = 2'b10;
            end else begin
               $display("ERR %d, %d",pp,b);
@@ -307,11 +310,11 @@ module fdiv
            end
         end
         3'd7:begin
-           if(pp<=7'd18)begin
+           if(pp<=8)begin
               qi[1:0] = 2'b00;
-           end else if(pp<=7'd48)begin
+           end else if(pp<=23)begin
               qi[1:0] = 2'b01;
-           end else if(pp<=7'd86)begin
+           end else if(pp<=42)begin
               qi[1:0] = 2'b10;
            end else begin
               $display("ERR %d, %d",pp,b);
