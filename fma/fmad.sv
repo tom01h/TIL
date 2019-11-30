@@ -118,20 +118,10 @@ module fmad
    input logic [63:0]  z,
    output logic [63:0] rslt,
    output logic [4:0]  flag,
-   output              mulit muli00, muli01,
-   input               mulot mulo00, mulo01,
-   output              mulit muli10, muli11,
-   input               mulot mulo10, mulo11,
-   output              sftit sfti00, sfti01,
-   input               sftot sfto00, sfto01,
-   output              sftit sfti10, sfti11,
-   input               sftot sfto10, sfto11,
-   output              selit seli0,  seli1,
-   input               selot selo0,  selo1,
-   output              addit addi10, addi11,
-   input               addot addo10, addo11,
-   output              addit addi20, addi21,
-   input               addot addo20, addo21
+   mul_if              mul_if00, mul_if01, mul_if10, mul_if11,
+   alnsft_if           alnsft_if00, alnsft_if01, alnsft_if10, alnsft_if11,
+   alnseld_if          alnseld_if0, alnseld_if1,
+   add_if              add_if10, add_if11, add_if20, add_if21
    );
 
    logic               en0, en1, en2;
@@ -204,7 +194,7 @@ module fmad
       .out(mul00),
       .req_in_1(req_in_1[26:0]),
       .req_in_2(req_in_2[26:0]),
-      .muli(muli00), .mulo(mulo00)
+      .mul(mul_if00)
       );
 
    mul mul01i
@@ -214,7 +204,7 @@ module fmad
       .out(mul01),
       .req_in_1(req_in_1[52:27]),
       .req_in_2(req_in_2[26:0]),
-      .muli(muli01), .mulo(mulo01)
+      .mul(mul_if01)
       );
 
    logic [47:0]        acc00, acc01, acc02, acc03, acc04, acc05, acc06, acc07;
@@ -228,7 +218,7 @@ module fmad
       .acc4(acc04), .acc5(acc05), .acc6(acc06), .acc7(acc07),
       .sft0(sft00), .sft1(sft01), .sft2(sft02), .sft3(sft03),
       .sft4(sft04), .sft5(sft05), .sft6(sft06), .sft7(sft07),
-      .seli(seli0), .selo(selo0)
+      .asel(alnseld_if0)
    );
 
    logic [48:0]      aln00, aln01, aln02, aln03, aln04, aln05, aln06, aln07;
@@ -241,7 +231,7 @@ module fmad
       .sft0(sft00), .sft1(sft01), .sft2(sft02), .sft3(sft03),
       .acc0o(),     .acc1o(),     .acc2o(),     .acc3o(),
       .aln0(aln00), .aln1(aln01), .aln2(aln02), .aln3(aln03),
-      .sfti(sfti00),      .sfto(sfto00)
+      .asft(alnsft_if00)
       );
 
    alnsft alnsft01
@@ -252,7 +242,7 @@ module fmad
       .sft0(sft04), .sft1(sft05), .sft2(sft06), .sft3(sft07),
       .acc0o(),     .acc1o(),     .acc2o(),     .acc3o(),
       .aln0(aln04), .aln1(aln05), .aln2(aln06), .aln3(aln07),
-      .sfti(sfti01),      .sfto(sfto01)
+      .asft(alnsft_if01)
       );
 
 /////////
@@ -315,7 +305,7 @@ module fmad
       .sub({4{sgnm0^sgnz0}}),                 .cin({sgnm0^sgnz0,1'b0}),
       .req_in_0(mul00),   .req_in_1({mul01[36:0],27'h0}),         .req_in_2(64'h0),
       .aln0(aln04[15:0]), .aln1(aln05[15:0]), .aln2(aln06[15:0]), .aln3(aln07[15:0]),
-      .addi(addi10),      .addo(addo10)
+      .add(add_if10)
       );
 
    add add11i
@@ -326,7 +316,7 @@ module fmad
       .sub({4{sgnm0^sgnz0}}),                 .cin(cout1),
       .req_in_0(64'h0),   .req_in_1(mul01[53:37]),                .req_in_2(64'h0),
       .aln0(aln00[15:0]), .aln1(aln01[15:0]), .aln2(aln02[15:0]), .aln3(aln03[15:0]),
-      .addi(addi11),      .addo(addo11)
+      .add(add_if11)
       );
 
    logic [53:0]        mul10,mul11;
@@ -337,7 +327,7 @@ module fmad
       .req_command(req_command),
       .out(mul10),
       .req_in_1(req_in_1[26:0]), .req_in_2(req_in_2[52:27]),
-      .muli(muli10),      .mulo(mulo10)
+      .mul(mul_if10)
       );
 
    mul mul11i
@@ -346,7 +336,7 @@ module fmad
       .req_command(req_command),
       .out(mul11),
       .req_in_1(req_in_1[52:27]), .req_in_2(req_in_2[52:27]),
-      .muli(muli11),      .mulo(mulo11)
+      .mul(mul_if11)
       );
 
    logic [47:0]        acc10, acc11, acc12, acc13, acc14, acc15, acc16, acc17;
@@ -360,7 +350,7 @@ module fmad
       .acc4(acc14), .acc5(acc15), .acc6(acc16), .acc7(acc17),
       .sft0(sft10), .sft1(sft11), .sft2(sft12), .sft3(sft13),
       .sft4(sft14), .sft5(sft15), .sft6(sft16), .sft7(sft17),
-      .seli(seli1), .selo(selo1)
+      .asel(alnseld_if1)
    );
 
    logic [48:0]        aln10, aln11, aln12, aln13, aln14, aln15, aln16, aln17;
@@ -373,7 +363,7 @@ module fmad
       .sft0(sft10), .sft1(sft11), .sft2(sft12), .sft3(sft13),
       .acc0o(),     .acc1o(),     .acc2o(),     .acc3o(),
       .aln0(aln10), .aln1(aln11), .aln2(aln12), .aln3(aln13),
-      .sfti(sfti10),      .sfto(sfto10)
+      .asft(alnsft_if10)
       );
 
    alnsft alnsft11
@@ -384,7 +374,7 @@ module fmad
       .sft0(sft14), .sft1(sft15), .sft2(sft16), .sft3(sft17),
       .acc0o(),     .acc1o(),     .acc2o(),     .acc3o(),
       .aln0(aln14), .aln1(aln15), .aln2(aln16), .aln3(aln17),
-      .sfti(sfti11),      .sfto(sfto11)
+      .asft(alnsft_if11)
       );
 
    logic [12:0]        expr1;
@@ -431,7 +421,7 @@ module fmad
       .sub({4{sgnz1^sgnm1}}),                           .cin({sgnm1^sgnz1,1'b0}),
       .req_in_0(add2in0[63:0]),      .req_in_1(add2in1[63:0]),      .req_in_2(add2in2[63:0]),
       .aln0(add2in3[63:48]), .aln1(add2in3[47:32]),     .aln2(add2in3[31:16]),   .aln3(add2in3[15: 0]),
-      .addi(addi20),      .addo(addo20)
+      .add(add_if20)
       );
 
    add add21i
@@ -442,7 +432,7 @@ module fmad
       .sub({4{sgnz1^sgnm1}}),                           .cin(cout2),
       .req_in_0(add2in0[143:64]),    .req_in_1(add2in1[143:64]),    .req_in_2(add2in2[143:64]),
       .aln0(add2in3[143:112]), .aln1(add2in3[111: 96]), .aln2(add2in3[ 95: 80]), .aln3(add2in3[ 79: 64]),
-      .addi(addi21),      .addo(addo21)
+      .add(add_if21)
       );
 
    logic [12:0]        expr2;

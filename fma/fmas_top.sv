@@ -1,14 +1,11 @@
-typedef struct packed {
+interface mul_if;
    logic       en;
    logic [31:0] req_in_1;
    logic [31:0] req_in_2;
-} mulit;
-
-typedef struct packed {
    logic [63:0] out;
-} mulot;
+endinterface
 
-typedef struct packed {
+interface add_if;
    logic       en;
    logic [3:0] sub;
    logic [1:0] cin;
@@ -19,28 +16,22 @@ typedef struct packed {
    logic [31:0] aln1;
    logic [31:0] aln2;
    logic [31:0] aln3;
-} addit;
-
-typedef struct packed {
    logic [65:64] cout;
    logic [81:0]  out;
    logic [31:0]  out0;
    logic [31:0]  out1;
    logic [31:0]  out2;
    logic [31:0]  out3;
-} addot;
+endinterface
 
-typedef struct packed {
+interface alnsft_if;
    logic       en0;
    logic [3:0] en1;
    logic [47:0] acc0, acc1, acc2, acc3;
    logic [5:0]  sft0, sft1, sft2, sft3;
-} sftit;
-
-typedef struct packed {
    logic [47:0] acc0o, acc1o, acc2o, acc3o;
    logic [48:0] aln0, aln1, aln2, aln3;
-} sftot;
+endinterface
 
 module fma
   (
@@ -55,12 +46,9 @@ module fma
    output logic [4:0]  flag
    );
 
-   mulit muli0;
-   mulot mulo0;
-   mulit sfti0;
-   mulot sfto0;
-   addit addi1;
-   addot addo1;
+   mul_if mul_ifs;
+   alnsft_if alnsft_ifs;
+   add_if add_ifs;
 
    fmas fmas
      (
@@ -73,12 +61,9 @@ module fma
       .z(z[31:0]),
       .rslt(rslt[31:0]),
       .flag(flag[4:0]),
-      .muli0(muli0),
-      .mulo0(mulo0),
-      .sfti0(sfti0),
-      .sfto0(sfto0),
-      .addi1(addi1),
-      .addo1(addo1)
+      .mul_if(mul_ifs),
+      .alnsft_if(alnsft_ifs),
+      .add_if(add_ifs)
       );
 
 endmodule
@@ -91,8 +76,7 @@ module mul
    output logic [63:0] out,
    input logic [31:0]  req_in_1,
    input logic [31:0]  req_in_2,
-   output              mulit muli,
-   input               mulot mulo
+   mul_if mul
    );
 
    mul0 mul0
@@ -126,8 +110,7 @@ module add
    input logic [31:0]   aln1,
    input logic [31:0]   aln2,
    input logic [31:0]   aln3,
-   output               addit addi,
-   input                addot addo
+   add_if add
    );
 
    add0 add0
@@ -164,8 +147,7 @@ module alnsft
    input logic [5:0]   sft0,  sft1,  sft2,  sft3,
    output logic [47:0] acc0o, acc1o, acc2o, acc3o,
    output logic [48:0] aln0,  aln1,  aln2,  aln3,
-   output              sftit  sfti,
-   input               sftot  sfto
+   alnsft_if asft
    );
 
    alnsft0 alnsft0

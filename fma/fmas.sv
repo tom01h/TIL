@@ -58,12 +58,9 @@ module fmas
    input logic [31:0]  z,
    output logic [31:0] rslt,
    output logic [4:0]  flag,
-   output              mulit muli0,
-   input               mulot mulo0,
-   output              sftit sfti0,
-   input               sftot sfto0,
-   output              addit addi1,
-   input               addot addo1
+   mul_if              mul_if,
+   alnsft_if           alnsft_if,
+   add_if              add_if
    );
 
    logic               en0, en1;
@@ -131,9 +128,7 @@ module fmas
       .req_in_1(req_in_1),
       .req_in_2(req_in_2),
       .out(mul),
-      .muli(muli0),
-      .mulo(mulo0)
-
+      .mul(mul_if)
    );
 
    logic [5:0]       sfti;
@@ -170,7 +165,7 @@ module fmas
       .sft0(sft0), .sft1(sft1), .sft2(sft2), .sft3(sft3),
       .acc0o(),    .acc1o(),    .acc2o(),    .acc3o(),
       .aln0(aln0), .aln1(aln1), .aln2(aln2), .aln3(aln3),
-      .sfti(sfti0),      .sfto(sfto0)
+      .asft(alnsft_if)
       );
 
    logic [8:0]       expa0;
@@ -224,8 +219,7 @@ module fmas
       .req_in_2('h0),
       .aln0(aln0),      .aln1(aln1),      .aln2(aln2),      .aln3(aln3),
       .out(add),
-      .addi(addi1),
-      .addo(addo1)
+      .add(add_if)
    );
 
    logic [8:0]       expr1;

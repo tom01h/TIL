@@ -10,12 +10,9 @@ module fmab
    input logic [31:0]  w,
    output logic [31:0] acc0, acc1, acc2, acc3,
    output logic [ 9:0] exp0, exp1, exp2, exp3,
-   output              mulit muli0,
-   input               mulot mulo0,
-   output              sftit sfti0,
-   input               sftot sfto0,
-   output              addit addi1,
-   input               addot addo1
+   mul_if              mul_if,
+   alnsft_if           alnsft_if,
+   add_if              add_if
    );
 
    logic               en0, en1;
@@ -47,8 +44,7 @@ module fmab
       .req_in_1(req_in_1),
       .req_in_2(req_in_2),
       .out(mul),
-      .muli(muli0),
-      .mulo(mulo0)
+      .mul(mul_if)
       );
 
    logic signed [9:0]  exp0l, exp1l, exp2l, exp3l;
@@ -94,7 +90,7 @@ module fmab
       .sft0(sft0),  .sft1(sft1),  .sft2(sft2),  .sft3(sft3),
       .acc0o(acc0), .acc1o(acc1), .acc2o(acc2), .acc3o(acc3),
       .aln0(aln0),  .aln1(aln1),  .aln2(aln2),  .aln3(aln3),
-      .sfti(sfti0), .sfto(sfto0)
+      .asft(alnsft_if)
       );
 
    logic [3:0]       mulctl;
@@ -150,8 +146,7 @@ module fmab
       .aln1(aln1),
       .aln2(aln2),
       .aln3(aln3),
-      .addi(addi1),
-      .addo(addo1)
+      .add(add_if)
    );
 
 endmodule

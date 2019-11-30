@@ -1,17 +1,14 @@
-typedef struct packed {
+interface mul_if;
    logic       en;
    logic [31:0] req_in_1;
    logic [31:0] req_in_2;
-} mulit;
-
-typedef struct packed {
    logic [63:0] out;
-} mulot;
+endinterface
 
-typedef struct packed {
-   logic       en;
-   logic [3:0] sub;
-   logic [1:0] cin;
+interface add_if;
+   logic        en;
+   logic [3:0]  sub;
+   logic [1:0]  cin;
    logic [79:0] req_in_0;
    logic [79:0] req_in_1;
    logic [79:0] req_in_2;
@@ -19,39 +16,30 @@ typedef struct packed {
    logic [31:0] aln1;
    logic [31:0] aln2;
    logic [31:0] aln3;
-} addit;
-
-typedef struct packed {
    logic [65:64] cout;
    logic [81:0]  out;
    logic [31:0]  out0;
    logic [31:0]  out1;
    logic [31:0]  out2;
    logic [31:0]  out3;
-} addot;
+endinterface
 
-typedef struct packed {
+interface alnsft_if;
    logic       en0;
    logic [3:0] en1;
    logic [47:0] acc0, acc1, acc2, acc3;
    logic [5:0]  sft0, sft1, sft2, sft3;
-} sftit;
-
-typedef struct packed {
    logic [47:0] acc0o, acc1o, acc2o, acc3o;
    logic [48:0] aln0, aln1, aln2, aln3;
-} sftot;
+endinterface
 
-typedef struct packed {
+interface alnseld_if;
    logic       en;
    logic [52:0] fracz;
    logic signed [12:0] expd;
-} selit;
-
-typedef struct packed {
    logic [47:0] acc0, acc1, acc2, acc3, acc4, acc5, acc6, acc7;
    logic [5:0]  sft0, sft1, sft2, sft3, sft4, sft5, sft6, sft7;
-} selot;
+endinterface
 
 module fma
   (
@@ -84,216 +72,67 @@ module fma
       end
    end
 
-   mulit muli00,muli01;
-   mulot mulo00,mulo01;
-   mulit muli10,muli11;
-   mulot mulo10,mulo11;
-   mulit mulis0,mulis1;
-   mulot mulos0,mulos1;
-   mulit muli0;
-   mulot mulo0;
-   mulit mulib0;
-   mulot mulob0;
+   mul_if mul_if00,mul_if01,mul_if10,mul_if11;
+   mul_if mul_ifs0,mul_ifs1,mul_ifb0,mul_ifb1;
 
-   always_comb begin
-      if(muli00.en)begin
-         mulis0 = muli00;
-         mulis1 = muli01;
-      end else if(muli10.en)begin
-         mulis0 = muli10;
-         mulis1 = muli11;
-      end else if(muli0.en)begin
-         mulis0 = muli0;
-         mulis1 = 0;
-         mulis1.en = 1'b0;
-      end else begin
-         mulis0 = mulib0;
-         mulis1 = 0;
-         mulis1.en = 1'b0;
-      end
-      mulo00 = mulos0;
-      mulo01 = mulos1;
-      mulo10 = mulos0;
-      mulo11 = mulos1;
-      mulo0 = mulos0;
-      mulob0 = mulos0;
-   end
-
-   mul0 mul0
+   mul_i mul_i0
      (
       .clk(clk),
       .req_command(req_command),
-      .en(mulis0.en),
-      .out(mulos0.out[63:0]),
-      .req_in_1(mulis0.req_in_1[31:0]),
-      .req_in_2(mulis0.req_in_2[31:0])
+      .mul0(mul_if00), .mul1(mul_if10),
+      .muls(mul_ifs0), .mulb(mul_ifb0)
       );
 
-   mul0 mul1
+   mul_i mul_i1
      (
       .clk(clk),
       .req_command(req_command),
-      .en(mulis1.en),
-      .out(mulos1.out[63:0]),
-      .req_in_1(mulis1.req_in_1[31:0]),
-      .req_in_2(mulis1.req_in_2[31:0])
+      .mul0(mul_if01), .mul1(mul_if11),
+      .muls(mul_ifs1), .mulb(mul_ifb1)
       );
 
-   sftit sfti00,sfti01;
-   sftot sfto00,sfto01;
-   sftit sfti10,sfti11;
-   sftot sfto10,sfto11;
-   sftit sftis0,sftis1;
-   sftot sftos0,sftos1;
-   sftit sfti0;
-   sftot sfto0;
-   sftit sftib0;
-   sftot sftob0;
+   alnsft_if alnsft_if00,alnsft_if01,alnsft_if10,alnsft_if11;
+   alnsft_if alnsft_ifs0,alnsft_ifs1,alnsft_ifb0,alnsft_ifb1;
 
-   always_comb begin
-      if(sfti00.en0)begin
-         sftis0 = sfti00;
-         sftis1 = sfti01;
-      end else if(sfti10.en0)begin
-         sftis0 = sfti10;
-         sftis1 = sfti11;
-      end else if(sfti0.en0)begin
-         sftis0 = sfti0;
-         sftis1 = 0;
-         sftis1.en0 = 1'b0;
-         sftis1.en1 = 4'h0;
-      end else begin
-         sftis0 = sftib0;
-         sftis1 = 0;
-         sftis1.en0 = 1'b0;
-         sftis1.en1 = 4'h0;
-      end
-      sfto00 = sftos0;
-      sfto01 = sftos1;
-      sfto10 = sftos0;
-      sfto11 = sftos1;
-      sfto0 = sftos0;
-      sftob0 = sftos0;
-   end
-
-   alnsft0 alnsft0
+   alnsft_i alnsft_i0
      (
-      .clk(clk),           .reset(reset),       .req_command(req_command),
-      .en0(sftis0.en0),    .en1(sftis0.en1),
-      .acc0(sftis0.acc0),  .acc1(sftis0.acc1),  .acc2(sftis0.acc2),  .acc3(sftis0.acc3),
-      .sft0(sftis0.sft0),  .sft1(sftis0.sft1),  .sft2(sftis0.sft2),  .sft3(sftis0.sft3),
-      .acc0o(sftos0.acc0o),.acc1o(sftos0.acc1o),.acc2o(sftos0.acc2o),.acc3o(sftos0.acc3o),
-      .aln0(sftos0.aln0),  .aln1(sftos0.aln1),  .aln2(sftos0.aln2),  .aln3(sftos0.aln3)
+      .clk(clk), .reset(reset), .req_command(req_command),
+      .asft0(alnsft_if00), .asft1(alnsft_if10),
+      .asfts(alnsft_ifs0), .asftb(alnsft_ifb0)
       );
 
-   alnsft0 alnsft1
+   alnsft_i alnsft_i1
      (
-      .clk(clk),           .reset(reset),       .req_command(req_command),
-      .en0(sftis1.en0),    .en1(sftis1.en1),
-      .acc0(sftis1.acc0),  .acc1(sftis1.acc1),  .acc2(sftis1.acc2),  .acc3(sftis1.acc3),
-      .sft0(sftis1.sft0),  .sft1(sftis1.sft1),  .sft2(sftis1.sft2),  .sft3(sftis1.sft3),
-      .acc0o(sftos0.acc0o),.acc1o(sftos0.acc1o),.acc2o(sftos0.acc2o),.acc3o(sftos0.acc3o),
-      .aln0(sftos1.aln0),  .aln1(sftos1.aln1),  .aln2(sftos1.aln2),  .aln3(sftos1.aln3)
+      .clk(clk), .reset(reset), .req_command(req_command),
+      .asft0(alnsft_if01), .asft1(alnsft_if11),
+      .asfts(alnsft_ifs1), .asftb(alnsft_ifb1)
       );
 
-   selit seli0, seli1;
-   selot selo0, selo1;
-   selit selis;
-   selot selos;
+   alnseld_if alnseld_if0;
+   alnseld_if alnseld_if1;
 
-   always_comb begin
-      if(seli0.en)begin
-         selis = seli0;
-      end else begin
-         selis = seli1;
-      end
-      selo0 = selos;
-      selo1 = selos;
-   end
-
-   alnseld0 alnseld0
+   alnseld_i alnseld_i
      (
-      .fracz(selis.fracz),      .expd(selis.expd),
-      .acc0(selos.acc0), .acc1(selos.acc1), .acc2(selos.acc2), .acc3(selos.acc3),
-      .acc4(selos.acc4), .acc5(selos.acc5), .acc6(selos.acc6), .acc7(selos.acc7),
-      .sft0(selos.sft0), .sft1(selos.sft1), .sft2(selos.sft2), .sft3(selos.sft3),
-      .sft4(selos.sft4), .sft5(selos.sft5), .sft6(selos.sft6), .sft7(selos.sft7)
-   );
+      .asel0(alnseld_if0),
+      .asel1(alnseld_if1)
+      );
 
-   addit addi10,addi11;
-   addot addo10,addo11;
-   addit addi20,addi21;
-   addot addo20,addo21;
-   addit addis0,addis1;
-   addot addos0,addos1;
-   addit addi1;
-   addot addo1;
-   addit addib1;
-   addot addob1;
+   add_if add_if10,add_if11,add_if20,add_if21;
+   add_if add_ifs0,add_ifs1,add_ifb0,add_ifb1;
 
-   always_comb begin
-      if(addi10.en)begin
-         addis0 = addi10;
-         addis1 = addi11;
-      end else if(addi20.en)begin
-         addis0 = addi20;
-         addis1 = addi21;
-      end else if(addi1.en)begin
-         addis0 = addi1;
-         addis1 = 0;
-      end else begin
-         addis0 = addib1;
-         addis1 = 0;
-      end
-      addo10 = addos0;
-      addo11 = addos1;
-      addo20 = addos0;
-      addo21 = addos1;
-      addo1 = addos0;
-      addob1 = addos0;
-   end
-
-   add0 add0
+   add_i add_i0
      (
       .clk(clk),
-      .en(addis0.en),
-      .cout(addos0.cout[65:64]),
-      .out(addos0.out[81:0]),
-      .out0(addos0.out0[31:0]),
-      .out1(addos0.out1[31:0]),
-      .out2(addos0.out2[31:0]),
-      .out3(addos0.out3[31:0]),
-      .sub(addis0.sub[3:0]),
-      .cin(addis0.cin[1:0]),
-      .req_in_0(addis0.req_in_0[79:0]),
-      .req_in_1(addis0.req_in_1[79:0]),
-      .req_in_2(addis0.req_in_2[79:0]),
-      .aln0(addis0.aln0[31:0]),
-      .aln1(addis0.aln1[31:0]),
-      .aln2(addis0.aln2[31:0]),
-      .aln3(addis0.aln3[31:0])
-   );
+      .add0(add_if10), .add1(add_if20),
+      .adds(add_ifs0), .addb(add_ifb0)
+      );
 
-   add0 add1
+   add_i add_i1
      (
       .clk(clk),
-      .en(addis1.en),
-      .cout(addos1.cout[65:64]),
-      .out(addos1.out[81:0]),
-      .out0(addos1.out0[31:0]),
-      .out1(addos1.out1[31:0]),
-      .out2(addos1.out2[31:0]),
-      .out3(addos1.out3[31:0]),
-      .sub(addis1.sub[3:0]),
-      .cin(addis1.cin[1:0]),
-      .req_in_0(addis1.req_in_0[79:0]),
-      .req_in_1(addis1.req_in_1[79:0]),
-      .req_in_2(addis1.req_in_2[79:0]),
-      .aln0(addis1.aln0[31:0]),
-      .aln1(addis1.aln1[31:0]),
-      .aln2(addis1.aln2[31:0]),
-      .aln3(addis1.aln3[31:0])
-   );
+      .add0(add_if11), .add1(add_if21),
+      .adds(add_ifs1), .addb(add_ifb1)
+      );
 
    fmad fmad
      (
@@ -306,34 +145,20 @@ module fma
       .z(z[63:0]),
       .rslt(rsltd[63:0]),
       .flag(flagd[4:0]),
-      .muli00(muli00),
-      .mulo00(mulo00),
-      .muli01(muli01),
-      .mulo01(mulo01),
-      .muli10(muli10),
-      .mulo10(mulo10),
-      .muli11(muli11),
-      .mulo11(mulo11),
-      .sfti00(sfti00),
-      .sfto00(sfto00),
-      .sfti01(sfti01),
-      .sfto01(sfto01),
-      .sfti10(sfti10),
-      .sfto10(sfto10),
-      .sfti11(sfti11),
-      .sfto11(sfto11),
-      .seli0(seli0),
-      .selo0(selo0),
-      .seli1(seli1),
-      .selo1(selo1),
-      .addi10(addi10),
-      .addo10(addo10),
-      .addi11(addi11),
-      .addo11(addo11),
-      .addi20(addi20),
-      .addo20(addo20),
-      .addi21(addi21),
-      .addo21(addo21)
+      .mul_if00(mul_if00),
+      .mul_if01(mul_if01),
+      .mul_if10(mul_if10),
+      .mul_if11(mul_if11),
+      .alnsft_if00(alnsft_if00),
+      .alnsft_if01(alnsft_if01),
+      .alnsft_if10(alnsft_if10),
+      .alnsft_if11(alnsft_if11),
+      .alnseld_if0(alnseld_if0),
+      .alnseld_if1(alnseld_if1),
+      .add_if10(add_if10),
+      .add_if11(add_if11),
+      .add_if20(add_if20),
+      .add_if21(add_if21)
       );
 
    fmas fmas
@@ -347,12 +172,9 @@ module fma
       .z(z[31:0]),
       .rslt(rslts[31:0]),
       .flag(flags[4:0]),
-      .muli0(muli0),
-      .mulo0(mulo0),
-      .sfti0(sfti0),
-      .sfto0(sfto0),
-      .addi1(addi1),
-      .addo1(addo1)
+      .mul_if(mul_ifs0),
+      .alnsft_if(alnsft_ifs0),
+      .add_if(add_ifs0)
       );
 
    fmab fmab
@@ -373,12 +195,9 @@ module fma
       .exp1(exp1[ 9:0]),
       .exp2(exp2[ 9:0]),
       .exp3(exp3[ 9:0]),
-      .muli0(mulib0),
-      .mulo0(mulob0),
-      .sfti0(sftib0),
-      .sfto0(sftob0),
-      .addi1(addib1),
-      .addo1(addob1)
+      .mul_if(mul_ifb0),
+      .alnsft_if(alnsft_ifb0),
+      .add_if(add_ifb0)
       );
 
 endmodule
@@ -391,14 +210,63 @@ module mul
    output logic [63:0] out,
    input logic [31:0]  req_in_1,
    input logic [31:0]  req_in_2,
-   output              mulit muli,
-   input               mulot mulo
+   mul_if mul
    );
 
-   assign muli.en = en;
-   assign muli.req_in_1 = req_in_1;
-   assign muli.req_in_2 = req_in_2;
-   assign out = mulo.out;
+   assign mul.en = en;
+   assign mul.req_in_1 = req_in_1;
+   assign mul.req_in_2 = req_in_2;
+   assign out = mul.out;
+endmodule
+
+module mul_i
+  (
+   input logic clk,
+   input integer req_command,
+   mul_if mul0, mul1,
+   mul_if muls, mulb
+   );
+
+   logic         en;
+   logic [31:0]  req_in_1;
+   logic [31:0]  req_in_2;
+
+   always_comb begin
+      if(mul0.en)begin
+         en = mul0.en;
+         req_in_1 = mul0.req_in_1;
+         req_in_2 = mul0.req_in_2;
+      end else if(mul1.en)begin
+         en = mul1.en;
+         req_in_1 = mul1.req_in_1;
+         req_in_2 = mul1.req_in_2;
+      end else if(muls.en)begin
+         en = muls.en;
+         req_in_1 = muls.req_in_1;
+         req_in_2 = muls.req_in_2;
+      end else begin
+         en = mulb.en;
+         req_in_1 = mulb.req_in_1;
+         req_in_2 = mulb.req_in_2;
+      end
+   end
+
+   logic [63:0]  out;
+
+   mul0 mul
+     (
+      .clk(clk),
+      .req_command(req_command),
+      .en(en),
+      .out(out[63:0]),
+      .req_in_1(req_in_1[31:0]),
+      .req_in_2(req_in_2[31:0])
+      );
+
+   assign mul0.out = out;
+   assign mul1.out = out;
+   assign muls.out = out;
+   assign mulb.out = out;
 
 endmodule
 
@@ -421,27 +289,149 @@ module add
    input logic [31:0]   aln1,
    input logic [31:0]   aln2,
    input logic [31:0]   aln3,
-   output               addit addi,
-   input                addot addo
+   add_if add
    );
 
-   assign addi.en = en;
-   assign addi.sub = sub;
-   assign addi.cin = cin;
-   assign addi.req_in_0 = req_in_0;
-   assign addi.req_in_1 = req_in_1;
-   assign addi.req_in_2 = req_in_2;
-   assign addi.aln0 = aln0;
-   assign addi.aln1 = aln1;
-   assign addi.aln2 = aln2;
-   assign addi.aln3 = aln3;
-   assign cout = addo.cout;
-   assign out = addo.out;
-   assign out0 = addo.out0;
-   assign out1 = addo.out1;
-   assign out2 = addo.out2;
-   assign out3 = addo.out3;
+   assign add.en = en;
+   assign add.sub = sub;
+   assign add.cin = cin;
+   assign add.req_in_0 = req_in_0;
+   assign add.req_in_1 = req_in_1;
+   assign add.req_in_2 = req_in_2;
+   assign add.aln0 = aln0;
+   assign add.aln1 = aln1;
+   assign add.aln2 = aln2;
+   assign add.aln3 = aln3;
 
+   assign cout = add.cout;
+   assign out = add.out;
+   assign out0 = add.out0;
+   assign out1 = add.out1;
+   assign out2 = add.out2;
+   assign out3 = add.out3;
+endmodule
+
+module add_i
+  (
+   input logic clk,
+   add_if add0, add1,
+   add_if adds, addb
+   );
+
+   logic       en;
+   logic [3:0] sub;
+   logic [1:0] cin;
+   logic [79:0] req_in_0;
+   logic [79:0] req_in_1;
+   logic [79:0] req_in_2;
+   logic [31:0] aln0;
+   logic [31:0] aln1;
+   logic [31:0] aln2;
+   logic [31:0] aln3;
+
+   always_comb begin
+      if(add0.en)begin
+         en = add0.en;
+         sub = add0.sub;
+         cin = add0.cin;
+         req_in_0 = add0.req_in_0;
+         req_in_1 = add0.req_in_1;
+         req_in_2 = add0.req_in_2;
+         aln0 = add0.aln0;
+         aln1 = add0.aln1;
+         aln2 = add0.aln2;
+         aln3 = add0.aln3;
+      end else if(add1.en)begin
+         en = add1.en;
+         sub = add1.sub;
+         cin = add1.cin;
+         req_in_0 = add1.req_in_0;
+         req_in_1 = add1.req_in_1;
+         req_in_2 = add1.req_in_2;
+         aln0 = add1.aln0;
+         aln1 = add1.aln1;
+         aln2 = add1.aln2;
+         aln3 = add1.aln3;
+      end else if(adds.en)begin
+         en = adds.en;
+         sub = adds.sub;
+         cin = adds.cin;
+         req_in_0 = adds.req_in_0;
+         req_in_1 = adds.req_in_1;
+         req_in_2 = adds.req_in_2;
+         aln0 = adds.aln0;
+         aln1 = adds.aln1;
+         aln2 = adds.aln2;
+         aln3 = adds.aln3;
+      end else begin
+         en = addb.en;
+         sub = addb.sub;
+         cin = addb.cin;
+         req_in_0 = addb.req_in_0;
+         req_in_1 = addb.req_in_1;
+         req_in_2 = addb.req_in_2;
+         aln0 = addb.aln0;
+         aln1 = addb.aln1;
+         aln2 = addb.aln2;
+         aln3 = addb.aln3;
+      end
+   end
+
+   logic [65:64] cout;
+   logic [81:0]  out;
+   logic [31:0]  out0;
+   logic [31:0]  out1;
+   logic [31:0]  out2;
+   logic [31:0]  out3;
+
+   add0 add
+     (
+      .clk(clk),
+      .en(en),
+      .cout(cout[65:64]),
+      .out(out[81:0]),
+      .out0(out0[31:0]),
+      .out1(out1[31:0]),
+      .out2(out2[31:0]),
+      .out3(out3[31:0]),
+      .sub(sub[3:0]),
+      .cin(cin[1:0]),
+      .req_in_0(req_in_0[79:0]),
+      .req_in_1(req_in_1[79:0]),
+      .req_in_2(req_in_2[79:0]),
+      .aln0(aln0[31:0]),
+      .aln1(aln1[31:0]),
+      .aln2(aln2[31:0]),
+      .aln3(aln3[31:0])
+      );
+
+   assign add0.cout = cout;
+   assign add0.out = out;
+   assign add0.out0 = out0;
+   assign add0.out1 = out1;
+   assign add0.out2 = out2;
+   assign add0.out3 = out3;
+
+   assign add1.cout = cout;
+   assign add1.out = out;
+   assign add1.out0 = out0;
+   assign add1.out1 = out1;
+   assign add1.out2 = out2;
+   assign add1.out3 = out3;
+
+   assign adds.cout = cout;
+   assign adds.out = out;
+   assign adds.out0 = out0;
+   assign adds.out1 = out1;
+   assign adds.out2 = out2;
+   assign adds.out3 = out3;
+
+   assign addb.cout = cout;
+   assign addb.out = out;
+   assign addb.out0 = out0;
+   assign addb.out1 = out1;
+   assign addb.out2 = out2;
+   assign addb.out3 = out3;
 endmodule
 
 module alnsft
@@ -455,28 +445,143 @@ module alnsft
    input logic [5:0]   sft0, sft1, sft2, sft3,
    output logic [48:0] aln0, aln1, aln2, aln3,
    output logic [47:0] acc0o,acc1o,acc2o,acc3o,
-   output              sftit sfti,
-   input               sftot sfto
+   alnsft_if asft
+   );
+   assign asft.en0 = en0;
+   assign asft.en1 = en1;
+   assign asft.acc0 = acc0;
+   assign asft.acc1 = acc1;
+   assign asft.acc2 = acc2;
+   assign asft.acc3 = acc3;
+   assign asft.sft0 = sft0;
+   assign asft.sft1 = sft1;
+   assign asft.sft2 = sft2;
+   assign asft.sft3 = sft3;
+
+   assign aln0 = asft.aln0;
+   assign aln1 = asft.aln1;
+   assign aln2 = asft.aln2;
+   assign aln3 = asft.aln3;
+   assign acc0o= asft.acc0o;
+   assign acc1o= asft.acc1o;
+   assign acc2o= asft.acc2o;
+   assign acc3o= asft.acc3o;
+endmodule
+
+module alnsft_i
+  (
+   input logic clk,
+   input logic reset,
+   input integer req_command,
+   alnsft_if asft0, asft1,
+   alnsft_if asfts, asftb
    );
 
-   assign sfti.en0 = en0;
-   assign sfti.en1 = en1;
-   assign sfti.acc0 = acc0;
-   assign sfti.acc1 = acc1;
-   assign sfti.acc2 = acc2;
-   assign sfti.acc3 = acc3;
-   assign sfti.sft0 = sft0;
-   assign sfti.sft1 = sft1;
-   assign sfti.sft2 = sft2;
-   assign sfti.sft3 = sft3;
-   assign aln0 = sfto.aln0;
-   assign aln1 = sfto.aln1;
-   assign aln2 = sfto.aln2;
-   assign aln3 = sfto.aln3;
-   assign acc0o= sfto.acc0o;
-   assign acc1o= sfto.acc1o;
-   assign acc2o= sfto.acc2o;
-   assign acc3o= sfto.acc3o;
+   logic         en0;
+   logic [3:0]   en1;
+   logic [47:0]  acc0, acc1, acc2, acc3;
+   logic [5:0]   sft0, sft1, sft2, sft3;
+
+   always_comb begin
+      if(asft0.en0)begin
+         en0 = asft0.en0;
+         en1 = asft0.en1;
+         acc0 = asft0.acc0;
+         acc1 = asft0.acc1;
+         acc2 = asft0.acc2;
+         acc3 = asft0.acc3;
+         sft0 = asft0.sft0;
+         sft1 = asft0.sft1;
+         sft2 = asft0.sft2;
+         sft3 = asft0.sft3;
+      end else if(asft1.en0)begin
+         en0 = asft1.en0;
+         en1 = asft1.en1;
+         acc0 = asft1.acc0;
+         acc1 = asft1.acc1;
+         acc2 = asft1.acc2;
+         acc3 = asft1.acc3;
+         sft0 = asft1.sft0;
+         sft1 = asft1.sft1;
+         sft2 = asft1.sft2;
+         sft3 = asft1.sft3;
+      end else if(asfts.en0)begin
+         en0 = asfts.en0;
+         en1 = asfts.en1;
+         acc0 = asfts.acc0;
+         acc1 = asfts.acc1;
+         acc2 = asfts.acc2;
+         acc3 = asfts.acc3;
+         sft0 = asfts.sft0;
+         sft1 = asfts.sft1;
+         sft2 = asfts.sft2;
+         sft3 = asfts.sft3;
+      end else begin
+         en0 = asftb.en0;
+         en1 = asftb.en1;
+         acc0 = asftb.acc0;
+         acc1 = asftb.acc1;
+         acc2 = asftb.acc2;
+         acc3 = asftb.acc3;
+         sft0 = asftb.sft0;
+         sft1 = asftb.sft1;
+         sft2 = asftb.sft2;
+         sft3 = asftb.sft3;
+      end
+   end
+
+   logic [48:0]  aln0, aln1, aln2, aln3;
+   logic [47:0]  acc0o,acc1o,acc2o,acc3o;
+
+   alnsft0 alnsft0
+     (
+      .clk(clk),           .reset(reset),       .req_command(req_command),
+      .en0(en0),    .en1(en1),
+      .acc0(acc0),  .acc1(acc1),  .acc2(acc2),  .acc3(acc3),
+      .sft0(sft0),  .sft1(sft1),  .sft2(sft2),  .sft3(sft3),
+      .acc0o(acc0o),.acc1o(acc1o),.acc2o(acc2o),.acc3o(acc3o),
+      .aln0(aln0),  .aln1(aln1),  .aln2(aln2),  .aln3(aln3)
+      );
+
+   assign asft0.aln0 =aln0;
+   assign asft0.aln1 =aln1;
+   assign asft0.aln2 =aln2;
+   assign asft0.aln3 =aln3;
+
+   assign asft0.acc0o =acc0o;
+   assign asft0.acc1o =acc1o;
+   assign asft0.acc2o =acc2o;
+   assign asft0.acc3o =acc3o;
+
+   assign asft1.aln0 =aln0;
+   assign asft1.aln1 =aln1;
+   assign asft1.aln2 =aln2;
+   assign asft1.aln3 =aln3;
+
+   assign asft1.acc0o =acc0o;
+   assign asft1.acc1o =acc1o;
+   assign asft1.acc2o =acc2o;
+   assign asft1.acc3o =acc3o;
+
+   assign asfts.aln0 =aln0;
+   assign asfts.aln1 =aln1;
+   assign asfts.aln2 =aln2;
+   assign asfts.aln3 =aln3;
+
+   assign asfts.acc0o =acc0o;
+   assign asfts.acc1o =acc1o;
+   assign asfts.acc2o =acc2o;
+   assign asfts.acc3o =acc3o;
+
+   assign asftb.aln0 =aln0;
+   assign asftb.aln1 =aln1;
+   assign asftb.aln2 =aln2;
+   assign asftb.aln3 =aln3;
+
+   assign asftb.acc0o =acc0o;
+   assign asftb.acc1o =acc1o;
+   assign asftb.acc2o =acc2o;
+   assign asftb.acc3o =acc3o;
 
 endmodule
 
@@ -487,29 +592,95 @@ module alnseld
    input logic signed [12:0] expd,
    output logic [47:0]       acc0, acc1, acc2, acc3, acc4, acc5, acc6, acc7,
    output logic [5:0]        sft0, sft1, sft2, sft3, sft4, sft5, sft6, sft7,
-   output                    selit seli,
-   input                     selot selo
+   alnseld_if asel
    );
 
-   assign seli.en = en;
-   assign seli.fracz = fracz;
-   assign seli.expd = expd;
+   assign asel.en = en;
+   assign asel.fracz = fracz;
+   assign asel.expd = expd;
 
-   assign acc0 = selo.acc0;
-   assign acc1 = selo.acc1;
-   assign acc2 = selo.acc2;
-   assign acc3 = selo.acc3;
-   assign acc4 = selo.acc4;
-   assign acc5 = selo.acc5;
-   assign acc6 = selo.acc6;
-   assign acc7 = selo.acc7;
-   assign sft0 = selo.sft0;
-   assign sft1 = selo.sft1;
-   assign sft2 = selo.sft2;
-   assign sft3 = selo.sft3;
-   assign sft4 = selo.sft4;
-   assign sft5 = selo.sft5;
-   assign sft6 = selo.sft6;
-   assign sft7 = selo.sft7;
+   assign acc0 = asel.acc0;
+   assign acc1 = asel.acc1;
+   assign acc2 = asel.acc2;
+   assign acc3 = asel.acc3;
+   assign acc4 = asel.acc4;
+   assign acc5 = asel.acc5;
+   assign acc6 = asel.acc6;
+   assign acc7 = asel.acc7;
+   assign sft0 = asel.sft0;
+   assign sft1 = asel.sft1;
+   assign sft2 = asel.sft2;
+   assign sft3 = asel.sft3;
+   assign sft4 = asel.sft4;
+   assign sft5 = asel.sft5;
+   assign sft6 = asel.sft6;
+   assign sft7 = asel.sft7;
+
+endmodule
+
+module alnseld_i
+  (
+   alnseld_if asel0,
+   alnseld_if asel1
+   );
+
+   logic [52:0]        fracz;
+   logic signed [12:0] expd;
+
+   always_comb begin
+      if(asel0.en)begin
+         fracz = asel0.fracz;
+         expd  = asel0.expd;
+      end else begin
+         fracz = asel1.fracz;
+         expd  = asel1.expd;
+      end
+   end
+
+   logic [47:0] acc0, acc1, acc2, acc3, acc4, acc5, acc6, acc7;
+   logic [5:0]  sft0, sft1, sft2, sft3, sft4, sft5, sft6, sft7;
+
+   alnseld0 alnseld0
+     (
+      .fracz(fracz),      .expd(expd),
+      .acc0(acc0), .acc1(acc1), .acc2(acc2), .acc3(acc3),
+      .acc4(acc4), .acc5(acc5), .acc6(acc6), .acc7(acc7),
+      .sft0(sft0), .sft1(sft1), .sft2(sft2), .sft3(sft3),
+      .sft4(sft4), .sft5(sft5), .sft6(sft6), .sft7(sft7)
+      );
+
+   assign asel0.acc0 = acc0;
+   assign asel0.acc1 = acc1;
+   assign asel0.acc2 = acc2;
+   assign asel0.acc3 = acc3;
+   assign asel0.acc4 = acc4;
+   assign asel0.acc5 = acc5;
+   assign asel0.acc6 = acc6;
+   assign asel0.acc7 = acc7;
+   assign asel0.sft0 = sft0;
+   assign asel0.sft1 = sft1;
+   assign asel0.sft2 = sft2;
+   assign asel0.sft3 = sft3;
+   assign asel0.sft4 = sft4;
+   assign asel0.sft5 = sft5;
+   assign asel0.sft6 = sft6;
+   assign asel0.sft7 = sft7;
+
+   assign asel1.acc0 = acc0;
+   assign asel1.acc1 = acc1;
+   assign asel1.acc2 = acc2;
+   assign asel1.acc3 = acc3;
+   assign asel1.acc4 = acc4;
+   assign asel1.acc5 = acc5;
+   assign asel1.acc6 = acc6;
+   assign asel1.acc7 = acc7;
+   assign asel1.sft0 = sft0;
+   assign asel1.sft1 = sft1;
+   assign asel1.sft2 = sft2;
+   assign asel1.sft3 = sft3;
+   assign asel1.sft4 = sft4;
+   assign asel1.sft5 = sft5;
+   assign asel1.sft6 = sft6;
+   assign asel1.sft7 = sft7;
 
 endmodule

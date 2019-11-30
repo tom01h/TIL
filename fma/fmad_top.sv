@@ -1,17 +1,14 @@
-typedef struct packed {
+interface mul_if;
    logic       en;
    logic [31:0] req_in_1;
    logic [31:0] req_in_2;
-} mulit;
-
-typedef struct packed {
    logic [63:0] out;
-} mulot;
+endinterface
 
-typedef struct packed {
-   logic       en;
-   logic [3:0] sub;
-   logic [1:0] cin;
+interface add_if;
+   logic        en;
+   logic [3:0]  sub;
+   logic [1:0]  cin;
    logic [79:0] req_in_0;
    logic [79:0] req_in_1;
    logic [79:0] req_in_2;
@@ -19,38 +16,30 @@ typedef struct packed {
    logic [31:0] aln1;
    logic [31:0] aln2;
    logic [31:0] aln3;
-} addit;
-
-typedef struct packed {
    logic [65:64] cout;
    logic [81:0]  out;
    logic [31:0]  out0;
    logic [31:0]  out1;
    logic [31:0]  out2;
    logic [31:0]  out3;
-} addot;
+endinterface
 
-typedef struct packed {
+interface alnsft_if;
    logic       en0;
    logic [3:0] en1;
    logic [47:0] acc0, acc1, acc2, acc3;
    logic [5:0]  sft0, sft1, sft2, sft3;
-} sftit;
-
-typedef struct packed {
    logic [47:0] acc0o, acc1o, acc2o, acc3o;
    logic [48:0] aln0, aln1, aln2, aln3;
-} sftot;
+endinterface
 
-typedef struct packed {
+interface alnseld_if;
+   logic       en;
    logic [52:0] fracz;
    logic signed [12:0] expd;
-} selit;
-
-typedef struct packed {
    logic [47:0] acc0, acc1, acc2, acc3, acc4, acc5, acc6, acc7;
    logic [5:0]  sft0, sft1, sft2, sft3, sft4, sft5, sft6, sft7;
-} selot;
+endinterface
 
 module fma
   (
@@ -65,20 +54,10 @@ module fma
    output logic [4:0]  flag
    );
 
-   mulit muli00,muli01;
-   mulot mulo00,mulo01;
-   mulit muli10,muli11;
-   mulot mulo10,mulo11;
-   sftit sfti00,sfti01;
-   sftot sfto00,sfto01;
-   sftit sfti10,sfti11;
-   sftot sfto10,sfto11;
-   selit seli0, seli1;
-   selot selo0, selo1;
-   addit addi10,addi11;
-   addot addo10,addo11;
-   addit addi20,addi21;
-   addot addo20,addo21;
+   mul_if mul_if00,mul_if01,mul_if10,mul_if11;
+   alnsft_if alnsft_if00,alnsft_if01,alnsft_if10,alnsft_if11;
+   alnseld_if alnseld_if0, alnseld_if1;
+   add_if add_if10,add_if11,add_if20,add_if21;
 
    fmad fmad
      (
@@ -91,34 +70,20 @@ module fma
       .z(z[63:0]),
       .rslt(rslt[63:0]),
       .flag(flag[4:0]),
-      .muli00(muli00),
-      .mulo00(mulo00),
-      .muli01(muli01),
-      .mulo01(mulo01),
-      .muli10(muli10),
-      .mulo10(mulo10),
-      .muli11(muli11),
-      .mulo11(mulo11),
-      .sfti00(sfti00),
-      .sfto00(sfto00),
-      .sfti01(sfti01),
-      .sfto01(sfto01),
-      .sfti10(sfti10),
-      .sfto10(sfto10),
-      .sfti11(sfti11),
-      .sfto11(sfto11),
-      .seli0(seli0),
-      .selo0(selo0),
-      .seli1(seli1),
-      .selo1(selo1),
-      .addi10(addi10),
-      .addo10(addo10),
-      .addi11(addi11),
-      .addo11(addo11),
-      .addi20(addi20),
-      .addo20(addo20),
-      .addi21(addi21),
-      .addo21(addo21)
+      .mul_if00(mul_if00),
+      .mul_if01(mul_if01),
+      .mul_if10(mul_if10),
+      .mul_if11(mul_if11),
+      .alnsft_if00(alnsft_if00),
+      .alnsft_if01(alnsft_if01),
+      .alnsft_if10(alnsft_if10),
+      .alnsft_if11(alnsft_if11),
+      .alnseld_if0(alnseld_if0),
+      .alnseld_if1(alnseld_if1),
+      .add_if10(add_if10),
+      .add_if11(add_if11),
+      .add_if20(add_if20),
+      .add_if21(add_if21)
       );
 
 endmodule
@@ -131,8 +96,7 @@ module mul
    output logic [63:0] out,
    input logic [31:0]  req_in_1,
    input logic [31:0]  req_in_2,
-   output              mulit muli,
-   input               mulot mulo
+   mul_if mul
    );
 
    mul0 mul0
@@ -166,8 +130,7 @@ module add
    input logic [31:0]   aln1,
    input logic [31:0]   aln2,
    input logic [31:0]   aln3,
-   output               addit addi,
-   input                addot addo
+   add_if add
    );
 
    add0 add0
@@ -204,8 +167,7 @@ module alnsft
    input logic [5:0]   sft0,  sft1,  sft2,  sft3,
    output logic [47:0] acc0o, acc1o, acc2o, acc3o,
    output logic [48:0] aln0,  aln1,  aln2,  aln3,
-   output              sftit  sfti,
-   input               sftot  sfto
+   alnsft_if asft
    );
 
    alnsft0 alnsft0
@@ -228,8 +190,7 @@ module alnseld
    input logic signed [12:0] expd,
    output logic [47:0]       acc0, acc1, acc2, acc3, acc4, acc5, acc6, acc7,
    output logic [5:0]        sft0, sft1, sft2, sft3, sft4, sft5, sft6, sft7,
-   output                    selit seli,
-   input                     selot selo
+   alnseld_if asel
    );
 
    alnseld0 alnseld0
