@@ -41,16 +41,16 @@ ACP 周りで Critical Warning 出るけど、良く分からないので放置�
 
 ### Petalinux を作る
 
-Vivado でビットストリーム込みの hdf ファイルをエクスポート、```petalinux_dma/project_1.sdk```にコピーして、
+Vivado でビットストリーム込みの xsaファイルをエクスポート、```petalinux_dma/project_1```にコピーして、
 
 ```
 $ source /opt/pkg/petalinux/2019.1/settings.sh
 $ petalinux-create --type project --template zynq --name petalinux_dma
 $ cd petalinux_dma/
-$ petalinux-config --get-hw-description=./project_1.sdk
+$ petalinux-config --get-hw-description=./project_1
 ```
 
-menuconfig の画面で ```Image Packaging Configuration ->  Root filesystem type -> SD card``` を選択する。
+menuconfig の画面で ```Image Packaging Configuration ->  Root filesystem type -> EXT(SD...)``` を選択する。
 
 DMA 転送に使うバッファ用に [udmabuf](https://github.com/ikwzm/udmabuf/blob/master/Readme.ja.md) を作る。
 
@@ -68,7 +68,7 @@ $ petalinux-build -c udmabuf
 続けて、udmabuf の設定をして、DMA と mem のアドレス空間を uio にする。  
 DMA に ```dma-coherent``` を設定する。  
 デバイスツリーに ```dma-coherent``` 付きで udmabuf を追加する。  
-具体的には ```ArtyZ7/3_dam/system-user.dtsi``` で ```project-spec/meta-user/recipes-bsp/device-tree/files/system-user.dtsi``` を上書きして、
+具体的には ```CORA/3_dam/system-user.dtsi``` で ```project-spec/meta-user/recipes-bsp/device-tree/files/system-user.dtsi``` を上書きして、
 
 ```
 $ petalinux-build
@@ -92,9 +92,7 @@ $ cp images/linux/image.ub /media/tom01h/BOOT
 rootfs.ext4 を SDカード(ext4) にコピーする。SD カードをアンマウントして、
 
 ```
-$ sudo dd if=images/linux/rootfs.ext4 of=/dev/sdb2 bs=16M
-$ sudo sync
-$ sudo resize2fs /dev/sdb2
+$ sudo tar xvf images/linux/rootfs.tar.gz -C /media/tom01h/${mount_point}
 $ sudo sync
 ```
 
