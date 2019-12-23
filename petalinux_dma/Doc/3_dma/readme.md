@@ -44,7 +44,7 @@ ACP 周りで Critical Warning 出るけど、良く分からないので放置�
 Vivado でビットストリーム込みの xsaファイルをエクスポート、```petalinux_dma/project_1```にコピーして、
 
 ```
-$ source /opt/pkg/petalinux/2019.1/settings.sh
+$ source /opt/pkg/petalinux/settings.sh
 $ petalinux-create --type project --template zynq --name petalinux_dma
 $ cd petalinux_dma/
 $ petalinux-config --get-hw-description=./project_1
@@ -68,7 +68,7 @@ $ petalinux-build -c udmabuf
 続けて、udmabuf の設定をして、DMA と mem のアドレス空間を uio にする。  
 DMA に ```dma-coherent``` を設定する。  
 デバイスツリーに ```dma-coherent``` 付きで udmabuf を追加する。  
-具体的には ```CORA/3_dam/system-user.dtsi``` で ```project-spec/meta-user/recipes-bsp/device-tree/files/system-user.dtsi``` を上書きして、
+具体的には ```ArtyZ7/3_dam/system-user.dtsi``` で ```project-spec/meta-user/recipes-bsp/device-tree/files/system-user.dtsi``` を上書きして、
 
 ```
 $ petalinux-build
@@ -80,7 +80,7 @@ $ petalinux-build
 $ petalinux-package --boot --force --fsbl images/linux/zynq_fsbl.elf --fpga images/linux/system.bit --u-boot
 ```
 
-生成物は ```images/linux/BOOT.bin, image.ub, rootfs.ext4``` です。
+生成物は ```images/linux/BOOT.bin, image.ub, rootfs.tar.gz``` です。
 
 BOOT.bin,  image.ub を SDカード(FAT32) にコピーする。
 
@@ -89,7 +89,7 @@ $ cp images/linux/BOOT.bin /media/tom01h/BOOT
 $ cp images/linux/image.ub /media/tom01h/BOOT
 ```
 
-rootfs.ext4 を SDカード(ext4) にコピーする。SD カードをアンマウントして、
+rootfs.tar.gz を SDカード(ext4) にコピーする。
 
 ```
 $ sudo tar xvf images/linux/rootfs.tar.gz -C /media/tom01h/${mount_point}

@@ -22,6 +22,6 @@
     compatible = "generic-uio";
     dma-coherent;
 };
-&mem_0 {
+&top_0 {
     compatible = "generic-uio";
 };
