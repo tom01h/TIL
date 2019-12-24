@@ -13,16 +13,16 @@ SD カード上に root ファイルシステムを持つ Petalinux を作成し
 
 ### Petalinux を作る
 
-Vivado でビットストリーム込みの hdf ファイルをエクスポート、```petalinux_dma/project_1.sdk```にコピーして、
+Vivado でビットストリーム込みの xsa ファイルをエクスポート、```petalinux_dma/project_1```にコピーして、
 
 ```
-$ source /opt/pkg/petalinux/2019.1/settings.sh
+$ source /opt/pkg/petalinux/settings.sh
 $ petalinux-create --type project --template zynq --name petalinux_dma
 $ cd petalinux_dma/
-$ petalinux-config --get-hw-description=./project_1.sdk
+$ petalinux-config --get-hw-description=./project_1
 ```
 
-menuconfig の画面で ```Image Packaging Configuration ->  Root filesystem type -> SD card``` を選択する。
+menuconfig の画面で ```Image Packaging Configuration ->  Root filesystem type -> EXT(SD...)``` を選択する。
 
 ```
 $ petalinux-build
@@ -34,7 +34,7 @@ $ petalinux-build
 $ petalinux-package --boot --force --fsbl images/linux/zynq_fsbl.elf --fpga images/linux/system.bit --u-boot
 ```
 
-生成物は ```images/linux/BOOT.bin, image.ub, rootfs.ext4``` です。
+生成物は ```images/linux/BOOT.bin, image.ub, rootfs.tar.gz``` です。
 
 BOOT.bin,  image.ub を SDカード(FAT32) にコピーする。
 
@@ -43,12 +43,10 @@ $ cp images/linux/BOOT.bin /media/tom01h/BOOT
 $ cp images/linux/image.ub /media/tom01h/BOOT
 ```
 
-rootfs.ext4 を SDカード(ext4) にコピーする。SD カードをアンマウントして、
+rootfs.tar.gz を SDカード(ext4) にコピーする。
 
 ```
-$ sudo dd if=images/linux/rootfs.ext4 of=/dev/sdb2 bs=16M
-$ sudo sync
-$ sudo resize2fs /dev/sdb2
+$ sudo tar xvf images/linux/rootfs.tar.gz -C /media/tom01h/${mount_point}
 $ sudo sync
 ```
 
