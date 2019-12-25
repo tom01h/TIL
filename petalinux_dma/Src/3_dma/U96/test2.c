@@ -42,11 +42,11 @@ void main(){
     perror("open");
     return;
   }
-  if ((dmaf = open("/dev/uio1", O_RDWR | O_SYNC)) < 0) {
+  if ((dmaf = open("/dev/uio4", O_RDWR | O_SYNC)) < 0) {
     perror("open");
     return;
   }
-  if ((memf = open("/dev/uio2", O_RDWR | O_SYNC)) < 0) {
+  if ((memf = open("/dev/uio5", O_RDWR | O_SYNC)) < 0) {
     perror("open");
     return;
   }

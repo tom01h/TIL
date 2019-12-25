@@ -1,5 +1,4 @@
 /include/ "system-conf.dtsi"
-/include/ "openamp-overlay.dtsi"
 /{
     chosen {
         bootargs = "earlycon clk_ignore_unused root=/dev/mmcblk0p2 rw rootwait  uio_pdrv_genirq.of_id=generic-uio";
