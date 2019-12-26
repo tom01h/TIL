@@ -60,7 +60,7 @@ Petalinux の使い方は [ZYBO (Zynq) 初心者ガイド](https://qiita.com/iwa
 7回目はデータ転送と演算をパイプライン動作させます。
 
 基本的には [Arty Z7(20)](http://akizukidenshi.com/catalog/g/gM-11921/) で進めて行きますが、たまに [CORA Z7(07S)](http://akizukidenshi.com/catalog/g/gM-13489/) とか [Z-turn](https://www.mouser.jp/ProductDetail/MYIR/MYS-7Z020-C-S?qs=sGAEpiMZZMspCjQQiuQ1fFTDrDpp2YD1BAGzL8zwYgeMsEw87QCFMw==) とか Ultra96 のサンプルも作る予定。  
-PL 部の自作回路はすべて Verilog で書くので HLS も SDSoC も使いません。
+PL 部の自作回路はすべて Verilog で書くので HLS も Vitis も使いません。
 
 ### ツールバージョン
 
