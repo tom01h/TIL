@@ -14,7 +14,7 @@ $ pip3 install setuptools
 
 で、準備をします。
 
-だいぶ強引ですが、 `setup.py` にverilog から変換されたファイルとVerilatorのライブラリから子ぽしてきたファイルも羅列します。
+だいぶ強引ですが、 `setup.py` にverilog から変換されたファイルとVerilatorのライブラリからコピーしてきたファイルも羅列します。
 
 リンク先では `from distutils.core` していますが今どきじゃないとのことで `from setuptools` に変更しています。
 
