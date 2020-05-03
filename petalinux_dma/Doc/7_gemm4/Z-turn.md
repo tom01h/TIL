@@ -20,13 +20,12 @@ IP の行列乗算機能は 4,5,6回目と同じです。
 
 ## RTL シミュレーションを実行する
 
-SystemC + Verilator とコラボした協調検証環境(全部手彫り)です。
+Verilator を使用した協調検証環境(全部手彫り)です。
 
 ##### ツールのバージョン
 
 - g++ (Ubuntu 7.3.0-27ubuntu1~18.04) 7.3.0
 - Verilator 4.010 2019-01-27 rev UNKNOWN_REV
-- SystemC 2.3.3-Accellera
 
 ##### 環境
 

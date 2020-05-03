@@ -1,9 +1,6 @@
-#include "systemc.h"
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 #include "Vtop.h"
-
-sc_clock clk ("clk", 10, SC_NS);
 
 union{
   struct{
@@ -23,22 +20,20 @@ Vtop* verilator_top;
 void eval()
 {
   // negedge clk /////////////////////////////
-  verilator_top->S_AXI_ACLK = !clk;
-  verilator_top->AXIS_ACLK = !clk;
+  verilator_top->S_AXI_ACLK = 0;
+  verilator_top->AXIS_ACLK = 0;
 
   verilator_top->eval();
-  sc_start(5, SC_NS);
 
   if((main_time>=vcdstart)&((main_time<vcdend)|(vcdend==0)))
     tfp->dump(main_time);
   main_time += 5;
 
   // posegedge clk /////////////////////////////
-  verilator_top->S_AXI_ACLK = !clk;
-  verilator_top->AXIS_ACLK = !clk;
+  verilator_top->S_AXI_ACLK = 1;
+  verilator_top->AXIS_ACLK = 1;
 
   verilator_top->eval();
-  sc_start(5, SC_NS);
 
   if((main_time>=vcdstart)&((main_time<vcdend)|(vcdend==0)))
     tfp->dump(main_time);
@@ -47,7 +42,7 @@ void eval()
   return;
 }
 
-int sc_main(int argc, char **argv) {
+int main(int argc, char **argv) {
 
   // Verilator setup /////////////////////////////
   Verilated::commandArgs(argc, argv);
@@ -75,7 +70,6 @@ int sc_main(int argc, char **argv) {
   verilator_top->S_AXI_WVALID = 0;
   verilator_top->S_AXIS_TVALID = 0;
   verilator_top->eval();
-  sc_start(5, SC_NS);
   main_time += 5;
 
   eval();eval();
