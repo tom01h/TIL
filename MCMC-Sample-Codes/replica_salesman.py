@@ -2,7 +2,7 @@ nbeta=200
 niter=500000
 dbeta=0.5e0
 ncity=100
-ninit=1      # 0 -> read "100_cities.txt"; 1 -> continue; 2 -> random config.
+ninit=2      # 0 -> read "100_cities.txt"; 1 -> continue; 2 -> random config.
 
 import sys
 import numpy as np
@@ -11,8 +11,8 @@ import math
 import matplotlib.pyplot as plt
 import pickle
 
-def calc_distance(x, ordering, ibeta):
-    orderd = x[ordering[ibeta]]
+def calc_distance(x, ordering):
+    orderd = x[ordering]
     r = orderd[1:] - orderd[:-1]
     r = r * r
     r = np.sum(r, axis=1)
@@ -23,7 +23,6 @@ minimum_distance = 100e0
 ordering = np.arange(0, ncity+1, 1)
 ordering = np.tile(ordering, (nbeta, 1))
 beta = np.arange(1, nbeta+1, 1, dtype = np.float32) * dbeta
-naccept = np.zeros(nbeta, dtype = np.int)
 distance_list = []
 
 if ninit == 0:
@@ -39,7 +38,7 @@ elif ninit == 2:
 
 distance = np.zeros(nbeta, dtype = np.float32)
 for ibeta in range(0, nbeta):
-    distance[ibeta] = calc_distance(x, ordering, ibeta)
+    distance[ibeta] = calc_distance(x, ordering[ibeta])
 
 # Main loop #
 for iter in range(1, niter+1):
@@ -51,17 +50,16 @@ for iter in range(1, niter+1):
             if k != l:
                 info_kl = 0
         # Metropolis for each replica #
-        action_init = distance[ibeta] * beta[ibeta]
-        ordering[ibeta][k], ordering[ibeta][l] = ordering[ibeta][l], ordering[ibeta][k]
-        distance_fin = calc_distance(x, ordering, ibeta)
+        ordering_fin = ordering[ibeta].copy()
+        ordering_fin[k], ordering_fin[l] = ordering_fin[l], ordering_fin[k]
+        distance_fin = calc_distance(x, ordering_fin)
         action_fin = distance_fin * beta[ibeta]
+        action_init = distance[ibeta] * beta[ibeta]
         # Metropolis test #
         metropolis = random.random()
         if math.exp(action_init - action_fin) > metropolis:
             distance[ibeta] = distance_fin
-            naccept[ibeta] = naccept[ibeta] + 1
-        else:
-            ordering[ibeta][k], ordering[ibeta][l] = ordering[ibeta][l], ordering[ibeta][k]
+            ordering[ibeta] = ordering_fin.copy()
     # Exchange replicas #
     for ibeta in range(0, nbeta-1):
         action_init  = distance[ibeta] * beta[ibeta]   + distance[ibeta+1] * beta[ibeta+1]
@@ -69,13 +67,14 @@ for iter in range(1, niter+1):
         # Metropolis test #
         metropolis = random.random()
         if math.exp(action_init - action_fin) > metropolis:
-            ordering[ibeta], ordering[ibeta+1] = ordering[ibeta+1], ordering[ibeta]
+            ordering[ibeta], ordering[ibeta+1] = ordering[ibeta+1].copy(), ordering[ibeta].copy()
+            distance[ibeta], distance[ibeta+1] = distance[ibeta+1],        distance[ibeta]
     # data output #
     if iter % 500 == 0:
         distance_200 = distance[199]
         if distance_200 < minimum_distance:
             minimum_distance = distance_200
-            minimum_ordering = ordering[nbeta-1]
+            minimum_ordering = ordering[nbeta-1].copy()
         distance_list = np.append(distance_list, minimum_distance)
         print(iter, distance_200, minimum_distance)
 
