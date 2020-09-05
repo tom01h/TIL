@@ -61,7 +61,7 @@ for iter in range(1, niter+1):
             distance[ibeta] = distance_fin
             ordering[ibeta] = ordering_fin.copy()
     # Exchange replicas #
-    for ibeta in range(0, nbeta-1):
+    for ibeta in range(iter % 2, nbeta-1, 2):
         action_init  = distance[ibeta] * beta[ibeta]   + distance[ibeta+1] * beta[ibeta+1]
         action_fin   = distance[ibeta] * beta[ibeta+1] + distance[ibeta+1] * beta[ibeta]
         # Metropolis test #
