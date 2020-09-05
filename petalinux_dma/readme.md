@@ -35,6 +35,8 @@ Linux 上のユーザプログラムと PL 上の自作回路の間でデータ�
 PL から DRAM をアクセスしたときにも CPU の持つキャッシュメモリとのコヒーレンシが保証されます。  
 CPU のレベル 2 キャッシュを PL と共有可能なため、データ転送速度が向上します。
 
+[キャッシュコヒーレンシについての補足](Chache/キャッシュコヒーレンシ.md)
+
 ### 目次
 
 [1回目](https://github.com/tom01h/TIL/tree/master/petalinux_dma/Doc/1_Boot): Petalinux のブート
