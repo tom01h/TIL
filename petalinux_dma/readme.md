@@ -37,6 +37,8 @@ CPU のレベル 2 キャッシュを PL と共有可能なため、データ転
 
 [キャッシュコヒーレンシについての補足](https://github.com/tom01h/TIL/blob/master/petalinux_dma/Cache/)
 
+[仮想記憶についての補足](https://github.com/tom01h/TIL/blob/master/petalinux_dma/MMU/)
+
 ### 目次
 
 [1回目](https://github.com/tom01h/TIL/tree/master/petalinux_dma/Doc/1_Boot): Petalinux のブート
