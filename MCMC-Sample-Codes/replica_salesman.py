@@ -48,10 +48,19 @@ for iter in range(1, niter+1):
             k = random.randrange(1, ncity)
             l = random.randrange(1, ncity)
             if k != l:
+                if k > l and iter % 2 == 0:
+                    k, l = l, k
                 info_kl = 0
         # Metropolis for each replica #
-        ordering_fin = ordering[ibeta].copy()
-        ordering_fin[k], ordering_fin[l] = ordering_fin[l], ordering_fin[k]
+        if iter % 2 == 0:  # 2-opt
+            ordering_fin = np.hstack((ordering[ibeta][0:k], ordering[ibeta][k:l][::-1], ordering[ibeta][l:]))
+        else:              # or-opt (simple)
+            p = ordering[ibeta][k]
+            ordering_fin = np.hstack((ordering[ibeta][0:k], ordering[ibeta][k+1:]))
+            if k < l:
+                ordering_fin = np.hstack((ordering_fin[0:l],   p, ordering_fin[l:]))
+            else:
+                ordering_fin = np.hstack((ordering_fin[0:l+1], p, ordering_fin[l+1:]))
         distance_fin = calc_distance(x, ordering_fin)
         action_fin = distance_fin * beta[ibeta]
         action_init = distance[ibeta] * beta[ibeta]
