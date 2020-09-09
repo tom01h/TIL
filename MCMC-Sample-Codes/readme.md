@@ -21,5 +21,3 @@ replica_salesman.py は Python に翻訳したもの。
 レプリカ交換をチクタクにして 10000万回実行、その後 2-opt と簡易 or-opt にして 50万回実行した結果。
 
 ![salesman](salesman.gif)
-
-![distance](test2\distance.png)
