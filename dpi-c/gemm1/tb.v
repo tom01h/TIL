@@ -59,13 +59,7 @@ module tb;
     reg          S_AXIS_TLAST;
     reg          S_AXIS_TVALID;
 
-    task verilog_task(input int i[1:0], output int o[1:0]);
-        $display("Hello from verilog_task(%d %d)", i[0], i[1]);
-        o[0] = 2 * i[0];
-        o[1] = 2 * i[1];
-    endtask
-
-    task init();
+    task v_init();
         reset = 1'b1;
         S_AXI_BREADY = 'b1;
         S_AXI_WSTRB = 'hf;
@@ -81,12 +75,12 @@ module tb;
         reset = 1'b0;
     endtask
 
-    task finish();
+    task v_finish();
         repeat(10) @(posedge clk);
         $finish;
     endtask
 
-    task write(input int address, input int data);
+    task v_write(input int address, input int data);
         S_AXI_AWADDR = address;
         S_AXI_WDATA = data;
         S_AXI_AWVALID = 'b1;
@@ -97,7 +91,7 @@ module tb;
         repeat(1) @(posedge clk);
     endtask
   
-    task send(input int data[64], input int size);
+    task v_send(input int data[64], input int size);
         S_AXIS_TVALID = 'b1;
         for(int i=0; i<size; i+=1)begin
             S_AXIS_TDATA = data[i];
@@ -107,7 +101,7 @@ module tb;
         repeat(1) @(posedge clk);
     endtask
 
-    task receive(output int data[64], input int size);
+    task v_receive(output int data[64], input int size);
         while(M_AXIS_TVALID== 'b0)
             repeat(1) @(posedge clk);
         for(int i=0; i<size; i+=1)begin
@@ -118,12 +112,11 @@ module tb;
     endtask
 
 
-    export "DPI-C" task verilog_task;
-    export "DPI-C" task init;
-    export "DPI-C" task finish;
-    export "DPI-C" task write;
-    export "DPI-C" task send;
-    export "DPI-C" task receive;
+    export "DPI-C" task v_init;
+    export "DPI-C" task v_finish;
+    export "DPI-C" task v_write;
+    export "DPI-C" task v_send;
+    export "DPI-C" task v_receive;
 
     import "DPI-C" context task c_tb();
 

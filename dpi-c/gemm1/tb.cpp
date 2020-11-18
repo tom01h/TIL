@@ -6,7 +6,7 @@
 DPI_LINK_DECL
 int c_tb() {
 
-  init();
+  v_init();
 
   int array[64];
 ////////////////////// Set Matrix /////////////////////////////
@@ -21,17 +21,17 @@ int c_tb() {
     printf("\n");
   }
   // matw <- 1;
-  write(0,1);
+  v_write(0,1);
   for(int i=0; i<32; i++){
     array[i] = matrix[i/8][i%8];
   }
-  send(array, 32);
+  v_send(array, 32);
   // matw <- 0;
-  write(0,0);
+  v_write(0,0);
 
 ////////////////////// run /////////////////////////////
   // run <- 1;
-  write(0,2);
+  v_write(0,2);
 
   int sample[4][8];
 
@@ -49,9 +49,9 @@ int c_tb() {
     for(int i=0; i<32; i++){
       array[i] = sample[i/8][i%8];
     }
-    send(array, 32);
+    v_send(array, 32);
 
-    receive(array, 16);
+    v_receive(array, 16);
 
     printf("\n--- Sample %d Output ---\n", num);
     for(int j=0; j<4; j++){
@@ -72,8 +72,8 @@ int c_tb() {
   }
 
   // run <- 0;
-  write(0,0);
+  v_write(0,0);
 
-  finish();
+  v_finish();
   return 0;
 }
