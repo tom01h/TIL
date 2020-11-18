@@ -28,7 +28,6 @@ sim: $(SIM_DIR)/Vadd
 
 $(SIM_DIR)/Vadd: $(DESIGN_SRCS) $(VERILATOR_CPP_TB)
 	$(VERILATOR) $(VERILATOR_OPTS) $(DESIGN_SRCS) --exe ../$(VERILATOR_CPP_TB)
-	cd sim; make $(VERILATOR_MAKE_OPTS) -f Vadd.mk Vadd__ALL.a
 	cp /usr/local/share/verilator/include/verilated.cpp .
 	cp /usr/local/share/verilator/include/verilated_vcd_c.cpp .
 	python3 setup.py build_ext -I/usr/local/share/verilator/include -i
