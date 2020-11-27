@@ -4,8 +4,6 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
-int command = 1;
-
 static PyObject *
 c_init (PyObject *self, PyObject *args) {
   v_init();
@@ -17,7 +15,6 @@ c_init (PyObject *self, PyObject *args) {
 static PyObject *
 c_finish (PyObject *self, PyObject *args) {
   v_finish();
-  command = 0;
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -139,11 +136,6 @@ int c_tb() {
     fprintf(stderr, "Failed to load\n");
     return 1;
   }
-  //while(command) {}
-  /*while(command != -1) {
-    if(command == 1){printf("init\n");   v_init();   command = 0;}
-    if(command == 2){printf("finish\n"); v_finish(); command = -1;}
-  }*/
   if (Py_FinalizeEx() < 0) {
     return 120;
   }
