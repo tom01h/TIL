@@ -21,9 +21,20 @@ Verilog Task は、初期化 `v_init` 、終了 `v_finish` 、と、`top` モジ
 Windows にインストールした ModelSim と Python 3.6 を WSL から使います。
 
 - ModelSim をインストール
+  
   - gcc は ModelSim 付属のものを使う (intelFPGA_pro/19.4/modelsim_ase/gcc-4.2.1-mingw32vc12/bin/ 的なやつ)
 - [ここ](https://pythonlinks.python.jp/ja/index.html) からダウンロードした **32bit 版** Python をインストール
+  
   - パスのトップにないとだめかもしれない
+  
+  - Windowsに追加するパス↓
+  
+  - ```
+    C:\intelFPGA_pro\19.4\modelsim_ase\win32aloem
+    C:\intelFPGA_pro\19.4\modelsim_ase\gcc-4.2.1-mingw32vc12\bin
+    C:\Users\tom01\AppData\Local\Programs\Python\Python36-32
+    C:\Users\tom01\AppData\Local\Programs\Python\Python36-32\Scripts
+    ```
 
 ## 実行
 
