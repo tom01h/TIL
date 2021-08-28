@@ -1,0 +1,8 @@
+[user]
+	name = tom01h
+	email = tom01h@gmail.com
+[core]
+	quotepath = false
+	autocrlf = input
+[push]
+	default = upstream
