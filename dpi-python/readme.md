@@ -20,7 +20,7 @@ Verilog Task は、初期化 `v_init` 、終了 `v_finish` 、と、`top` モジ
 
 #### Verilog から Python を呼ぶ場合は…
 
-tb.cpp の `PyUnicode_DecodeFSDefault("tb2");` を tb2→tb に変更する
+build.sh の top.cpp→tb.cpp に変更する
 
 build.sh と run.sh の最後の↓の部分を削除する
 
@@ -43,11 +43,9 @@ tb.cpp でエラー処理をちゃんとしないと tb.py にエラーがあっ
 tb.py を python コマンドから呼ぶのでエラーメッセージがちゃんと出ます。起動の流れは、
 
 1. Verilog シミュレータ起動
-2. tb.v 内の c_tb() 呼び出しで tb.cpp 内の c_tb() を実行
-3. `PyUnicode_DecodeFSDefault("tb2");` で tb2.py を指定して
-4. `PyObject_GetAttrString(pModule, "py_tb");` で tb2.py の py_tb を呼び出す
+2. tb.v 内の c_tb() 呼び出しで top.cpp 内の c_tb() を実行
 5. tb.py を python コマンドから起動
-6. tb.py の top.c_XX が top.py から MMAP 経由で tb2.py に渡って、tb.cpp の c_XX を経由して tb.v の v_XX を呼び出しつつ Verilog シミュレーション実行
+6. tb.py の top.c_XX が top.py から MMAP 経由で top.cpp を経由して tb.v の v_XX を呼び出しつつ Verilog シミュレーション実行
 
 ## 準備
 
