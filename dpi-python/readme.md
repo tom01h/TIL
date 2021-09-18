@@ -20,7 +20,7 @@ Verilog Task は、初期化 `v_init` 、終了 `v_finish` 、と、`top` モジ
 
 #### Verilog から Python を呼ぶ場合は…
 
-build.sh の top.cpp→tb.cpp に変更して、コンパイラの Python をインクルードしてリンクするところのコメントを外す
+build.sh の top.cpp→tb.cpp に変更して、コンパイル時の Python をインクルードしてリンクするところのコメントを外す
 
 build.sh と run.sh の最後の↓の部分を削除する
 
