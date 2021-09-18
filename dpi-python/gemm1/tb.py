@@ -56,3 +56,6 @@ def py_tb():
     top.c_finish()
 
     return
+
+if __name__ == '__main__':
+    py_tb()

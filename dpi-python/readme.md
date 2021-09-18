@@ -1,6 +1,6 @@
 # DPI-Python もどきを作る
 
-DPI-C と [Python-API](https://docs.python.org/ja/3/extending/embedding.html) を使って Verilog から Python スクリプトを起動、Python から Verilog Task を呼びます。
+DPI-C と [Python-API](https://docs.python.org/ja/3/extending/embedding.html) を使って Python から Verilog Task を呼びます。
 
 テストは Python スクリプト `tb.py` から制御します。
 
@@ -15,6 +15,39 @@ Verilog Task は、初期化 `v_init` 、終了 `v_finish` 、と、`top` モジ
   - Verilog で行列乗算を計算して結果を `v_receive`
   - Python スクリプトで期待値を計算して先の値と比較
 - 終了 `v_finish`
+
+### tb.py の起動方法2通り
+
+#### Verilog から Python を呼ぶ場合は…
+
+tb.cpp の `PyUnicode_DecodeFSDefault("tb2");` を tb2→tb に変更する
+
+build.sh と run.sh の最後の↓の部分を削除する
+
+```
+ > /dev/null &
+
+python.exe tb.py
+```
+
+tb.cpp でエラー処理をちゃんとしないと tb.py にエラーがあっても解析し難いです。起動の流れは、
+
+1. Verilog シミュレータ起動
+2. tb.v 内の c_tb() 呼び出しで tb.cpp 内の c_tb() を実行
+3. `PyUnicode_DecodeFSDefault("tb");` で tb.py を指定して
+4.  `PyObject_GetAttrString(pModule, "py_tb");` で tb.py の py_tb を呼び出す
+5. tb.py の top.c_XX で tb.cpp の c_XX を経由して tb.v の v_XX を呼び出しつつ Verilog シミュレーション実行
+
+#### MMAP した tb.txt 経由でマルチプロセス
+
+tb.py を python コマンドから呼ぶのでエラーメッセージがちゃんと出ます。起動の流れは、
+
+1. Verilog シミュレータ起動
+2. tb.v 内の c_tb() 呼び出しで tb.cpp 内の c_tb() を実行
+3. `PyUnicode_DecodeFSDefault("tb2");` で tb2.py を指定して
+4. `PyObject_GetAttrString(pModule, "py_tb");` で tb2.py の py_tb を呼び出す
+5. tb.py を python コマンドから起動
+6. tb.py の top.c_XX が top.py から MMAP 経由で tb2.py に渡って、tb.cpp の c_XX を経由して tb.v の v_XX を呼び出しつつ Verilog シミュレーション実行
 
 ## 準備
 

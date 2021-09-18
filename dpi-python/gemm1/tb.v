@@ -14,6 +14,7 @@ module tb;
     initial begin
         clk = 1'b1;
         c_tb();
+        $finish;
     end
 
     wire         S_AXI_ACLK    = clk;
@@ -78,7 +79,7 @@ module tb;
 
     task v_finish();
         repeat(10) @(posedge clk);
-        $finish;
+        //$finish;
     endtask
 
     task v_write(input int address, input int data);

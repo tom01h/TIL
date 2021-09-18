@@ -108,7 +108,7 @@ int c_tb() {
   PyImport_AppendInittab("top", &PyInit_top);
 
   Py_Initialize();
-  pName = PyUnicode_DecodeFSDefault("tb");
+  pName = PyUnicode_DecodeFSDefault("tb2");
   /* Error checking of pName left out */
 
   pModule = PyImport_Import(pName);

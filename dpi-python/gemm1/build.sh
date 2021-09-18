@@ -14,6 +14,10 @@ vsim.exe tb -dpiexportobj cexports -c
 g++.exe -c -g -I'C:/intelFPGA_pro/20.3/modelsim_ase/include/' tb.cpp -o tb.obj -I"C:/Users/tom01/AppData/Local/Programs/Python/Python36-32/include/"
 g++.exe -shared -o cimports.dll tb.obj cexports.obj -L'C:/intelFPGA_pro/20.3/modelsim_ase/win32aloem' -lmtipli -L"C:/Users/tom01/AppData/Local/Programs/Python/Python36-32/libs/" -lpython36
 
+dd if=/dev/zero of=tb.txt bs=1K count=1
+
 vsim.exe -c -sv_lib cimports tb -do " \
 add wave -noupdate /tb/* -recursive; \
-run 10us;quit -f"
+run 10us;quit -f" > /dev/null &
+
+python.exe tb.py
