@@ -12,7 +12,7 @@ union long_char {
  
 DPI_LINK_DECL
 int c_tb() {
-    char *buf;
+    volatile char *buf;
     HANDLE map_handle;
     HANDLE handle;
     int size;
@@ -73,7 +73,7 @@ int c_tb() {
                 }
                 v_receive(array, size.i);
                 for(int i=0; i<size.i; i++){
-                    data.i = array[i];
+                    data.l = array[i];
                     for(int j=0; j<8; j++){
                         buf[i*8+j+16] = data.c[j];
                     }
@@ -83,7 +83,7 @@ int c_tb() {
         }
     }
 
-    UnmapViewOfFile(buf);
+    UnmapViewOfFile((char*)buf);
     if(map_handle != INVALID_HANDLE_VALUE) {
         CloseHandle(map_handle);
         map_handle = INVALID_HANDLE_VALUE;
