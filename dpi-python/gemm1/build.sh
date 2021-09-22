@@ -3,7 +3,7 @@
 export WSLENV=PYTHONPATH/l
 export PYTHONPATH=$PWD
 
-rm -r work cexports.obj cimports.dll dpiheader.h tb.obj
+rm -r work/ __pycache__/ cexports.obj cimports.dll dpiheader.h tb.obj
 
 vlib.exe work
 
